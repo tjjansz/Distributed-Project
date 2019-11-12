@@ -14,14 +14,15 @@ public class NTLMPassword {
 
     private final static char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
-    private NTLMPassword() {
-        throw new UnsupportedOperationException("Can not instantiate this class.");
+    public NTLMPassword() {
+        //throw new UnsupportedOperationException("Can not instantiate this class.");
     }
 
 
     public static String encode(String value) {
         String s = (value != null) ? value : "";
-        byte[] hash = NtlmPasswordAuthentication.nTOWFv1(s);
+        NtlmPasswordAuthentication test = new NtlmPasswordAuthentication("");
+        byte[] hash = test.nTOWFv1(s);
         return bytesToHex(hash).toUpperCase();
     }
 
@@ -60,14 +61,14 @@ public class NTLMPassword {
     }
 
 
-public static void printAllKLengthRec(char set[], String prefix, 
-                                    int n, int k) 
+public static void printAllKLengthRec(char set[], String prefix, int k) 
 { 
     
     // Base case: k is 0, 
     // print prefix 
     if (k == 0) 
     { 
+        
         storage[counter] = prefix+":"+encode(prefix);
         counter++;
         
@@ -125,7 +126,7 @@ fr.close();
     // One by one add all characters  
     // from set and recursively  
     // call for k equals to k-1 
-    for (int i = 0; i < n; i++) 
+    for (int i = 0; i < set.length; i++) 
     { 
         String newPrefix; 
           
@@ -134,13 +135,13 @@ fr.close();
           
         // k is decreased, because  
         // we have added a new character 
-        printAllKLengthRec(set, newPrefix, n, k - 1); 
+        printAllKLengthRec(set, newPrefix, k - 1); 
     } 
   
 } 
-    public static void printAllKLength(char set[], int k,int n) 
+    public static void printAllKLength(char set[], int k) 
 { 
-    printAllKLengthRec(set, "", n, k); 
+    printAllKLengthRec(set, "", k); 
 } 
     public static void oneChar(){
             String input = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
@@ -157,21 +158,7 @@ fr.close();
             
         }
     }
-   public static void main (String argvs []){
 
-
-       String input = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-        System.out.println(input.length());
-         char[] charset = new char[input.length()]; 
-  
-        // Copy character by character into array 
-        for (int i = 0; i < input.length(); i++) { 
-            charset[i] = input.charAt(i); 
-        } 
-
-     printAllKLength(charset, 5, 95);
-
-    }
 
 
 }
