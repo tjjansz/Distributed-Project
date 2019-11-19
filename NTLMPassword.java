@@ -18,7 +18,13 @@ public class NTLMPassword {
         //throw new UnsupportedOperationException("Can not instantiate this class.");
     }
 
+    public static byte[] encodeBytes(String value){
+         String s = (value != null) ? value : "";
+        NtlmPasswordAuthentication test = new NtlmPasswordAuthentication("");
+        byte[] hash = test.nTOWFv1(s);
+        return hash;
 
+    }
     public static String encode(String value) {
         String s = (value != null) ? value : "";
         NtlmPasswordAuthentication test = new NtlmPasswordAuthentication("");
