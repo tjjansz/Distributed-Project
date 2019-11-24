@@ -12,6 +12,8 @@ import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.io.*;
+import jcifs.smb.NtlmPasswordAuthentication;
 
 public class HashGenerator {
 	private final int blockSize = 115;
@@ -27,7 +29,11 @@ public class HashGenerator {
 		instantiateBuckets();
 	}
 	
+
 	
+	
+
+
 	//instantiates buckets data structure
 	private void instantiateBuckets() {
 		bucketRanges = new BigInteger[this.numBuckets];
@@ -43,6 +49,15 @@ public class HashGenerator {
 		for (int i = 0; i < buckets.length; i++) {
 			buckets[i] = new LinkedList<byte[]>();
 		}
+	try{
+	ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("index.ser"));
+        out.writeObject(bucketRanges);
+        out.flush();
+        out.close();
+	}catch(Exception e){
+		e.printStackTrace();
+	}
+
 	}
 	
 	//generates hashes and places in buckets LinkedList data structure. Generates from starting string to 
@@ -68,24 +83,31 @@ public class HashGenerator {
 	
 		for (int z = 0; z < numIncrement; z++) {
 			boolean increase = false;
-			for (int i = indexes.size() - 1; i >= 0; i--) {
+			//
+			for (int i = indexes.size() - 1; i >= -1; i--) {
 
-				if ((i == 0) && increase == true) {
+				if ((i == -1) && increase == true) {
 					indexes.add(0);
-
+					increase = false;
+					
 				}
+				if ((i==-1)&& increase == false){
+					break;
+				}
+				//if last character of working string & last character of charset
 				if ((i == (indexes.size() - 1)) && (indexes.get(i) == this.charset.length() - 1)) {
+				
 					increase = true;
 					indexes.set(i, 0);
-					if (i == 0) {
-						indexes.add(0);
-					}
+					
 				} else if (i == (indexes.size() - 1)) {
+		
 					indexes.set(i, indexes.get(i) + 1);
 					increase = false;
 
 					break;
 				} else if (increase == true) {
+			
 					if (indexes.get(i) == this.charset.length() - 1) {
 						increase = true;
 						indexes.set(i, 0);
@@ -106,6 +128,7 @@ public class HashGenerator {
 			String string = new String(str);
 			NTLMPassword ntlm = new NTLMPassword();
 			byte[] bytes = ntlm.encodeBytes(string);
+
 			placeInBucket(bytes);
 
 		}
@@ -115,6 +138,7 @@ public class HashGenerator {
 	private void placeInBucket(byte[] value) {
 		int index = binarySearch(this.bucketRanges, 0, this.bucketRanges.length - 1, new BigInteger(1, value));
 		// System.out.println(index);
+		
 		buckets[index].add(value);
 	}
 
