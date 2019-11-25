@@ -1,7 +1,5 @@
 /**
  * This class encodes strings to NTLM Hex encoding.
- * 
- * 
  */
 
 import jcifs.smb.NtlmPasswordAuthentication;
@@ -14,13 +12,23 @@ public class NTLMPassword {
     public NTLMPassword() {
     }
 
+    /**
+     * 
+     * @param value 
+     * @return byte[] 
+     */
     public static byte[] encodeBytes(String value){
-         String s = (value != null) ? value : "";
+        String s = (value != null) ? value : "";
         NtlmPasswordAuthentication temp = new NtlmPasswordAuthentication("");
         byte[] hash = temp.nTOWFv1(s);
         return hash;
-
     }
+
+    /**
+     * 
+     * @param value
+     * @return byte[]
+     */
     public static String encode(String value) {
         String s = (value != null) ? value : "";
         NtlmPasswordAuthentication temp = new NtlmPasswordAuthentication("");
@@ -28,6 +36,11 @@ public class NTLMPassword {
         return bytesToHex(hash).toUpperCase();
     }
 
+    /**
+     * 
+     * @param bytes
+     * @return String
+     */
     private static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {

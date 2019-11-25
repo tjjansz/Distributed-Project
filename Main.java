@@ -7,20 +7,30 @@ import java.util.ArrayList;
 import java.io.*;
 
 public class Main {
-		public static int findIndexFile(byte [] val){
-			try{
-			 ObjectInputStream in = new ObjectInputStream(new FileInputStream("index.ser"));
-			  BigInteger[] array = (BigInteger[]) in.readObject();
-			  in.close();
-			  return binarySearch(array, 0, array.length-1, new BigInteger(val));
-        
-			}catch(Exception e){}
-			return -1;
+
+	/**
+	 * 
+	 * @param val
+	 * @return 
+	 */
+	public static int findIndexFile(byte [] val){
+		try{
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream("index.ser"));
+			BigInteger[] array = (BigInteger[]) in.readObject();
+			in.close();
+			return binarySearch(array, 0, array.length-1, new BigInteger(val));
+		} catch(Exception e){}
 		
+		return -1;
 	}
 
-		public static boolean verifyFile(int index, byte[] val) {
-
+	/**
+	 * 
+	 * @param index
+	 * @param val
+	 * @return
+	 */
+	public static boolean verifyFile(int index, byte[] val) {
 		try {
 			byte[] b = new byte[16];
 			String inputFilename = index + ".dat";
@@ -37,27 +47,30 @@ public class Main {
 				
 			}
 			is.close();
-		
 
 		} catch (IOException ioe) {
 			System.out.println("Error " + ioe.getMessage());
 		}
 		return false;
-
 	}
 
-		private static int binarySearch(BigInteger arr[], int l, int r, BigInteger x) {
-
+	/**
+	 * 
+	 * @param arr
+	 * @param l
+	 * @param r
+	 * @param x
+	 * @return
+	 */
+	private static int binarySearch(BigInteger arr[], int l, int r, BigInteger x) {
 		if (r >= l) {
 			int mid = l + (r - l) / 2;
 
 			if (arr[mid].compareTo(x) == 0)
 				return mid;
 
-
 			if (arr[mid].compareTo(x) == 1)
 				return binarySearch(arr, l, mid - 1, x);
-
 	
 			return binarySearch(arr, mid + 1, r, x);
 		} else {
@@ -92,12 +105,10 @@ public class Main {
 		hgen.generate("", 5000000);
 		hgen.writeToFiles();
 		*/
-
-		
 		NTLMPassword ntlm = new NTLMPassword();
-			byte[] bytes = ntlm.encodeBytes("ab");
-			BigInteger temp = new BigInteger(1,bytes);
-			System.out.println(temp.toString() + "\n");
+		byte[] bytes = ntlm.encodeBytes("ab");
+		BigInteger temp = new BigInteger(1,bytes);
+		System.out.println(temp.toString() + "\n");
 		System.out.println(verifyFile(findIndexFile(bytes),bytes));
 		
 		//findIndexFile();

@@ -23,18 +23,20 @@ public class HashGenerator {
 	private BigInteger[] bucketRanges;
 	private LinkedList<byte[]>[] buckets;
 
-	//paritionsize is the specified allocation size on hard disk by user in megabytes
+	/**
+	 * Paritionsize is the specified allocation size on hard disk by user in megabytes
+	 * 
+	 * @param parititionSize
+	 */
 	public HashGenerator(int parititionSize) {
 		this.numBuckets = parititionSize / blockSize;
 		instantiateBuckets();
 	}
 	
-
-	
-	
-
-
-	//instantiates buckets data structure
+	/**
+	 * Instantiates buckets data structure
+	 * 
+	 */
 	private void instantiateBuckets() {
 		bucketRanges = new BigInteger[this.numBuckets];
 		bucketRanges[0] = BigInteger.valueOf(0);
@@ -59,10 +61,16 @@ public class HashGenerator {
 	}
 
 	}
-	
-	//generates hashes and places in buckets LinkedList data structure. Generates from starting string to 
-	//a specified incremented number. For input ("a", 3) Would generate hashes for [b,c,d] in this case.
-	//it is not inclusive of starting value
+
+	/**
+	 * Generates hashes and places in buckets LinkedList data structure. 
+	 * Generates from starting string to a specified incremented number.
+	 * For input ("a", 3) Would generate hashes for [b,c,d] in this case.
+	 * It is not inclusive of starting value
+	 * 
+	 * @param start
+	 * @param numIncrement
+	 */
 	public void generate(String start, int numIncrement) {
 		BigInteger[] array = new BigInteger[numIncrement];
 		ArrayList<Integer> indexes = new ArrayList<Integer>();
@@ -134,7 +142,11 @@ public class HashGenerator {
 		}
 	}
 	
-	//places byte array into bucket (LinkedList)
+	/**
+	 * places byte array into bucket (LinkedList)
+	 * 
+	 * @param value
+	 */
 	private void placeInBucket(byte[] value) {
 		int index = binarySearch(this.bucketRanges, 0, this.bucketRanges.length - 1, new BigInteger(1, value));
 		// System.out.println(index);
@@ -142,7 +154,9 @@ public class HashGenerator {
 		buckets[index].add(value);
 	}
 
-	//writes contents of buckets to file
+	/**
+	 * Writes contents of buckets to file
+	 */
 	public void writeToFiles() {
 
 		for (int i = 0; i < this.bucketRanges.length; i++) {
@@ -151,7 +165,12 @@ public class HashGenerator {
 
 	}
 	
-	//reads in specified file; returns BigInteger array of values to be analyzed
+	/**
+	 * reads in specified file; returns BigInteger array of values to be analyzed
+	 * 
+	 * @param inputFilename
+	 * @return
+	 */
 	public LinkedList <BigInteger> verifyFile(String inputFilename) {
 
 		LinkedList<BigInteger> temp = new LinkedList<BigInteger>();
@@ -176,18 +195,24 @@ public class HashGenerator {
 
 	}
 	
-	//returns buckets
+	/**
+	 * returns buckets
+	 * 
+	 * @return
+	 */
 	public LinkedList<byte[]>[] getBuckets(){
 		
 		return buckets;
 	}
 
-	/*
-	 * 
-	 * HELPER FUNCTIONS
-	 */
+	// HELPER FUNCTIONS
 	
-	//writes byte array to file
+	/**
+	 * writes byte array to file
+	 * 
+	 * @param bytes
+	 * @param filename
+	 */
 	static void writeByteArraytoFile(byte[] bytes, String filename) {
 		try {
 
@@ -207,14 +232,25 @@ public class HashGenerator {
 
 	}
 	
-	//converts LinkedList of byte arrays to two dimensional byte array
+	
+	/**
+	 * converts LinkedList of byte arrays to two dimensional byte array
+	 * 
+	 * @param list
+	 * @return
+	 */
 	private byte[][] convertToArray(LinkedList<byte[]> list) {
 		byte[][] arr = new byte[list.size()][];
 		arr = list.toArray(arr);
 		return arr;
 	}
 	
-	//finds index of given character in charset
+	/**
+	 * finds index of given character in charset
+	 * 
+	 * @param c
+	 * @return
+	 */
 	private int findIndexinCharset(char c) {
 		for (int i = 0; i < charset.length(); i++) {
 			if (c == charset.charAt(i)) {
@@ -225,7 +261,12 @@ public class HashGenerator {
 	}
 	
 	
-	//converts two dimensional byte array to single dimensional
+	/**
+	 * converts two dimensional byte array to single dimensional
+	 * 
+	 * @param input
+	 * @return
+	 */
 	private byte[] convert1d(byte[][] input) {
 		int z = 0;
 		byte[] arr = new byte[input.length * input[0].length];
@@ -238,7 +279,15 @@ public class HashGenerator {
 		return arr;
 	}
 
-	//modified binary search, takes in array and target value. Returns index of closest lowest value.
+	/**
+	 * Modified binary search, takes in array and target value. 
+	 * Returns index of closest lowest value.
+	 * @param arr
+	 * @param l
+	 * @param r
+	 * @param x
+	 * @return
+	 */
 	private int binarySearch(BigInteger arr[], int l, int r, BigInteger x) {
 
 		if (r >= l) {
