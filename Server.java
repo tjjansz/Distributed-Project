@@ -121,6 +121,10 @@ class ClientHandler extends Thread
                   
                 // creating Date object 
                 Date date = new Date(); 
+                DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd"); 
+                DateFormat fortime = new SimpleDateFormat("hh:mm:ss"); 
+                fordate.format(date); 
+                fortime.format(date); 
                   
                 // write on output stream based on the 
                 // answer from the client 
