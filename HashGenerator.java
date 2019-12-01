@@ -19,7 +19,6 @@ public class HashGenerator {
 	private final int blockSize = 115;
 	private final String charset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 	private int numBuckets;
-	
 	private BigInteger[] bucketRanges;
 	private LinkedList<byte[]>[] buckets;
 
@@ -80,9 +79,10 @@ public class HashGenerator {
 			String string = ""+ charset.charAt(0);
 			NTLMPassword ntlm = new NTLMPassword();
 			byte[] bytes = ntlm.encodeBytes(string);
-			placeInBucket(bytes);
+			placeInBucket(bytes, string);
 			numIncrement--;
 			generate(string, numIncrement);
+			return;
 		}
 		
 		for (int i = start.length() - 1; i >= 0; i--) {
@@ -136,22 +136,37 @@ public class HashGenerator {
 			String string = new String(str);
 			NTLMPassword ntlm = new NTLMPassword();
 			byte[] bytes = ntlm.encodeBytes(string);
-
-			placeInBucket(bytes);
-
+			
+			
+			placeInBucket(bytes, string);
+			
 		}
 	}
+	
+	
+	
 	
 	/**
 	 * places byte array into bucket (LinkedList)
 	 * 
 	 * @param value
 	 */
-	private void placeInBucket(byte[] value) {
+	private void placeInBucket(byte[] value, String clearText) {
 		int index = binarySearch(this.bucketRanges, 0, this.bucketRanges.length - 1, new BigInteger(1, value));
 		// System.out.println(index);
 		
-		buckets[index].add(value);
+		byte [] clearTextBytes = writePadChars(clearText.toCharArray(),5);
+		
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try {
+		outputStream.write(clearTextBytes);
+		outputStream.write(value);
+		}
+		catch (Exception e){
+			e.printStackTrace();
+		}
+		
+		buckets[index].add(outputStream.toByteArray());
 	}
 
 	/**
@@ -232,7 +247,25 @@ public class HashGenerator {
 
 	}
 	
-	
+	private byte[] writePadChars(char array[], int num) {
+		char [] output = new char[num];
+		int numZero = num - array.length;
+		byte [] bytearray = new byte[num];
+		
+		for (int i=0;i<array.length;i++) {
+			output[i] = array[i];
+		}
+		
+		for (int i=0;i<numZero;i++) {
+				output[array.length+i] = (char)0;
+		}
+		
+		for (int i=0;i<bytearray.length;i++) {
+			bytearray[i] = (byte) output[i];
+		}
+		return bytearray;
+		
+	}
 	/**
 	 * converts LinkedList of byte arrays to two dimensional byte array
 	 * 
