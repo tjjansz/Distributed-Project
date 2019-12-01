@@ -39,30 +39,43 @@ class ClientHandler extends Thread
 
     public static Boolean checkCompleted(String start) throws IOException {
         File file = new File("BlockList.txt");
-        if(file.exists()){
-            PrintLine("Exists");
-        }
-        else {
+        if(!file.exists()){
             PrintLine("Not Exists, creating new block list file");
             file.createNewFile();
         }
         Scanner scanner = new Scanner(file);
         String clearText, IDs;
-        PrintLine("Checking Block List for the block that starts with: " + start);
+        PrintLine("Checking Block List for the block that starts with: \"" + start + "\"...");
         while(true){
             while(scanner.hasNextLine()){
                 clearText = scanner.nextLine();
                 IDs = scanner.nextLine();
                 if(clearText.equals(start)){
-                    String message = new String(start + " marked as completed in block list by workers with ID: " + IDs);
+                    String message = new String("\"" + start + "\" marked as completed in block list by workers with ID: " + IDs + "\n");
                     PrintLine(message);
                     return true;
                 }
             }
-            String message = new String("Block stating with \"" + start + "\" has not yet been completed and will be assigned");
+            String message = new String("Block stating with \"" + start + "\" has not yet been completed and will be assigned\n");
             PrintLine(message);
             return false;
         }
+    }
+
+    public static Boolean writeCompleted(String start, String workerID) throws IOException{
+        String textToAppend = (start + "\n" + workerID);
+        File file = new File("BlockList.txt");
+        if(!file.exists()){
+            PrintLine("Not Exists, creating new block list file");
+            file.createNewFile();
+        }
+        BufferedWriter writer = new BufferedWriter(
+            new FileWriter(file, true)  //Set true for append mode
+        );  
+        writer.newLine();   //Add new line
+        writer.write(textToAppend);
+        writer.close();
+        return true;
     }
     public static void Print(String str){ //Implemented quicker print methods to save time
       System.out.print(str);
@@ -87,10 +100,18 @@ class ClientHandler extends Thread
         String toreturn; 
 
         try{
-            checkCompleted("a");
-            checkCompleted("thomas");
-            checkCompleted("m12lk");
-            checkCompleted("asd");
+            if(!checkCompleted("a")){
+                writeCompleted("a", "123e4567-e89b-12d3-a456-426655440000");
+            };
+            if(!checkCompleted("thomas")){
+                writeCompleted("thomas", "123e4567-e89b-12d3-a456-426655440000");
+            };
+            if(!checkCompleted("m12lk")){
+                writeCompleted("m12lk", "123e4567-e89b-12d3-a456-426655440000");
+            };
+            if(!checkCompleted("new")){
+                writeCompleted("new", "123e4567-e89b-12d3-a456-426655440000");
+            };
         }catch(IOException e){
             e.printStackTrace(); 
         }
