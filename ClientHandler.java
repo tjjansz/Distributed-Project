@@ -10,6 +10,16 @@ class ClientHandler extends Thread
     final DataInputStream dis; 
     final DataOutputStream dos; 
     final Socket s; 
+    
+    final int CODE_INIT = 110; //To Server to initialize node
+    final int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
+    final int CODE_GEN_FINISHED = 112; //To Server block generation compelete and stored
+    final int CODE_SEARCH = 113; //From Server sent hash to resolve
+    final int CODE_GENERATE = 114; //From Server sent block for work
+    final int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
+    final int CODE_GEN_FAILED = 116; //To Server block generation failed
+    final int CODE_READY = 117; //To Server to notify ready
+    
 
     //for generating queue list
     private static ArrayList <String> queueList = new ArrayList <String>();
@@ -17,8 +27,10 @@ class ClientHandler extends Thread
 	private static boolean flag = false;
 	private static String charset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
+    private String workerID;
 
-    private static queueListBuilder(){
+
+    private static void queueListBuilder(){
         generateFunc("",5000000);
 		File tmpDir = new File("QL.txt");
 
@@ -212,28 +224,66 @@ class ClientHandler extends Thread
         String received; 
         String toreturn; 
 
-        try{
-            if(!checkCompleted("a")){
-                writeCompleted("a", "123e4567-e89b-12d3-a456-426655440000");
-            };
-            if(!checkCompleted("thomas")){
-                writeCompleted("thomas", "123e4567-e89b-12d3-a456-426655440000");
-            };
-            if(!checkCompleted("m12lk")){
-                writeCompleted("m12lk", "123e4567-e89b-12d3-a456-426655440000");
-            };
-            if(!checkCompleted("new")){
-                writeCompleted("new", "123e4567-e89b-12d3-a456-426655440000");
-            };
-        }catch(IOException e){
-            e.printStackTrace(); 
-        }
+        // try{
+        //     if(!checkCompleted("a")){
+        //         writeCompleted("a", "123e4567-e89b-12d3-a456-426655440000");
+        //     };
+        //     if(!checkCompleted("thomas")){
+        //         writeCompleted("thomas", "123e4567-e89b-12d3-a456-426655440000");
+        //     };
+        //     if(!checkCompleted("m12lk")){
+        //         writeCompleted("m12lk", "123e4567-e89b-12d3-a456-426655440000");
+        //     };
+        //     if(!checkCompleted("new")){
+        //         writeCompleted("new", "123e4567-e89b-12d3-a456-426655440000");
+        //     };
+        // }catch(IOException e){
+        //     e.printStackTrace(); 
+        // }
         
         while (true)  
         { 
+            // final int CODE_INIT = 110; //To Server to initialize node
+            // final int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
+            // final int CODE_GEN_FINISHED = 112; //To Server block generation compelete and stored
+            // final int CODE_SEARCH = 113; //From Server sent hash to resolve
+            // final int CODE_GENERATE = 114; //From Server sent block for work
+            // final int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
+            // final int CODE_GEN_FAILED = 116; //To Server block generation failed
+            // final int CODE_READY = 117; //To Server to notify ready
             try { 
-                
-                  
+                int code = dis.readInt();
+                switch(code){
+                    case CODE_INIT://CODE_INIT
+                        workerID = dis.readUTF();
+                        break;
+                    case CODE_SEARCH_FINISHED:
+                        String decoded = dis.readUTF();
+                        PrintLine(decoded);
+                        break;
+                    case CODE_GEN_FINISHED:
+                        writeCompleted("StringStart", workerID);
+                        break;
+                    case CODE_SEARCH_FAILED:
+                        break;
+                    case CODE_GEN_FAILED:
+                        String failed = dis.readUTF();
+                        //Add back to queue
+                        break;
+                    case CODE_READY:
+                        
+                        dos.writeInt(CODE_GENERATE);
+                        //Pop from work queue
+                        //Check BL
+                        //Send to client if not complete
+                        dos.writeUTF("StringStart");
+                        //Wait for completion at dis.readInt()
+                        
+                        break;
+                    case default:
+                        break;
+                }
+
                 // receive the answer from client 
                 received = dis.readUTF(); 
                   while (!received.equals("Exit")){

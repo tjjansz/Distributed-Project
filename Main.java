@@ -10,6 +10,16 @@ import java.util.*;
 import java.net.*; 
 
 public class Main {
+    int CODE_INIT = 110; //To Server to initialize node
+    int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
+    int CODE_GEN_FINISHED = 112; //To Server block generation compelete and stored
+    int CODE_SEARCH = 113; //From Server sent hash to resolve
+    int CODE_GENERATE = 114; //From Server sent block for work
+    int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
+    int CODE_GEN_FAILED = 116; //To Server block generation failed
+    int CODE_READY = 117; //To Server to notify ready
+    
+    
 	//creates file structure and generates first block
 	static HashGenerator init() {
 		 HashGenerator hgen = new HashGenerator(200*1024);
@@ -23,7 +33,8 @@ public class Main {
 		return Search.searchAll(bigInt.toByteArray());
 	}
 	public static void main(String argvs[]) {
-		HashGenerator test = new HashGenerator(-1);
+		HashGenerator test = new HashGenerator(200*1024);
+        int id = test.getID;
 		 try
         { 
             Scanner scn = new Scanner(System.in); 
@@ -40,13 +51,38 @@ public class Main {
       
             // the following loop performs the exchange of 
             // information between client and client handler 
+            dos.writeInt(CODE_INIT); //CODE_INIT
+            dos.writeUTF(id);
+
+            dos.writeInt(CODE_READY);//CODE_READY
             while (true)  
-            { 
-                while (true){
-               System.out.println("Sending Id");
-                String tosend = test.getId();
-                dos.writeUTF(tosend); 
-                System.out.println(dis.readUTF());
+            {     
+               dis.readInt();
+               switch(code){
+                    case CODE_SEARCH:
+                        String target = dis.readUTF();
+                        //Generate rainbow fragment
+                        if ("function returns ok"){
+                            dos.writeInt(CODE_SEARCH_FINISHED);
+                            dos.writeUTF("decoded text");
+                        }else{
+                            dos.writeInt(CODE_SEARCH_FAILED);
+                        }
+                        break;
+                    case CODE_GENERATE:
+                        String start = dis.readUTF();
+                        //Generate rainbow fragment
+                        try{
+                            test.generate(start); 
+		                    test.writeToFiles();
+                            dos.writeInt(CODE_GEN_FINISHED);
+                        }catch (Exception e) {
+                            dos.writeInt(CODE_GEN_FAILED);
+                            dos.writeUTF(start);
+                        }
+                        break;
+                    case default:
+                        break;
                 }
                   
                 // If client sends exit,close this connection  

@@ -70,9 +70,11 @@ public class HashGenerator {
 		}
 
 	}
-public String getId() {
-	return this.id;
-}
+
+	public String getId() {
+		return this.id;
+	}
+	
 	private void generateId() {
 		// generate ID
 		UUID uuid = UUID.randomUUID();
