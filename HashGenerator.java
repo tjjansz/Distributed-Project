@@ -1,39 +1,96 @@
+
 /*
  * This class' primary function is to generate large volume of hashes and the related storage functions/procedures
  * 
  */
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.UUID;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.io.*;
 import jcifs.smb.NtlmPasswordAuthentication;
+import java.util.Scanner;
 
 public class HashGenerator {
 	private final int blockSize = 115;
 	private final String charset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 	private int numBuckets;
-	
-	private BigInteger[] bucketRanges; //Starting "number" for bucket
-	private LinkedList<byte[]>[] buckets; //3D array of linked lists [Bucket][Hash][Clear]
+	private final int entriesPerBlock = 5000000;
+	private BigInteger[] bucketRanges;
+	private LinkedList<byte[]>[] buckets;
+	private String id;
+	private String start;
+	private String end;
 
+	public String getEnd() {
+		return this.end;
+	}
 
 	/**
-	 * Paritionsize is the specified allocation size on hard disk by user in megabytes
+	 * Paritionsize is the specified allocation size on hard disk by user in
+	 * megabytes
 	 * 
 	 * @param parititionSize
 	 */
 	public HashGenerator(int parititionSize) {
-		this.numBuckets = parititionSize / blockSize;
-		instantiateBuckets();
+		if (parititionSize > 0) {
+			this.numBuckets = parititionSize / blockSize;
+			generateId();
+			instantiateBuckets();
+		} else {
+			File tmpDir = new File("index.ser");
+
+			boolean exists = tmpDir.exists();
+
+			if (exists) {
+				loadProfile();
+			} else {
+				instantiateBuckets();
+
+			}
+		}
+	}
+
+	private void loadProfile() {
+		bucketRanges = (BigInteger[]) ReadObjectFromFile("index.ser");
+		buckets = (LinkedList<byte[]>[]) new LinkedList[bucketRanges.length];
+		for (int i = 0; i < buckets.length; i++) {
+			buckets[i] = new LinkedList<byte[]>();
+		}
+
+		File file = new File("id.txt");
+		Scanner sc;
+		try {
+			sc = new Scanner(file);
+			this.id = sc.nextLine();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+public String getId() {
+	return this.id;
+}
+	private void generateId() {
+		// generate ID
+		UUID uuid = UUID.randomUUID();
+		this.id = uuid.toString();
+
+		File file = new File("id.txt");
+		try {
+			FileWriter fr = new FileWriter(file, true);
+			fr.write(this.id);
+			fr.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 	
+
+
 	/**
 	 * Instantiates buckets data structure
 	 * 
@@ -52,72 +109,81 @@ public class HashGenerator {
 		for (int i = 0; i < buckets.length; i++) {
 			buckets[i] = new LinkedList<byte[]>();
 		}
-	try{
-	ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("index.ser"));
-        out.writeObject(bucketRanges);
-        out.flush();
-        out.close();
-	}catch(Exception e){
-		e.printStackTrace();
+		try {
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("index.ser"));
+			out.writeObject(bucketRanges);
+			out.flush();
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
+	public void generate(String start) {
+		this.start = start;
+		for (int i = 0; i < buckets.length; i++) {
+			buckets[i] = new LinkedList<byte[]>();
+		}
+
+		generateFunc(start, entriesPerBlock);
 	}
 
 	/**
-	 * Generates hashes and places in buckets LinkedList data structure. 
-	 * Generates from starting string to a specified incremented number.
-	 * For input ("a", 3) Would generate hashes for [b,c,d] in this case.
-	 * It is not inclusive of starting value
+	 * Generates hashes and places in buckets LinkedList data structure. Generates
+	 * from starting string to a specified incremented number. For input ("a", 3)
+	 * Would generate hashes for [b,c,d] in this case. It is not inclusive of
+	 * starting value
 	 * 
 	 * @param start
 	 * @param numIncrement
 	 */
-	public void generate(String start, int numIncrement) {
+	private void generateFunc(String start, int numIncrement) {
 		BigInteger[] array = new BigInteger[numIncrement];
 		ArrayList<Integer> indexes = new ArrayList<Integer>();
-		
-		if (start.length()==0) {
-			
-			String string = ""+ charset.charAt(0);
+
+		if (start.length() == 0) {
+
+			String string = "" + charset.charAt(0);
 			NTLMPassword ntlm = new NTLMPassword();
 			byte[] bytes = ntlm.encodeBytes(string);
 			placeInBucket(bytes, string);
 			numIncrement--;
-			generate(string, numIncrement);
+			generateFunc(string, numIncrement);
 			return;
 		}
-		
+
 		for (int i = start.length() - 1; i >= 0; i--) {
 			indexes.add(findIndexinCharset(start.charAt(i)));
 		}
-	
+
 		for (int z = 0; z < numIncrement; z++) {
 			boolean increase = false;
-			
+			//
 			for (int i = indexes.size() - 1; i >= -1; i--) {
 
 				if ((i == -1) && increase == true) {
 					indexes.add(0);
 					increase = false;
-					
+
 				}
-				if ((i==-1)&& increase == false){
+				if ((i == -1) && increase == false) {
 					break;
 				}
-				//if last character of working string & last character of charset
+				// if last character of working string & last character of charset
 				if ((i == (indexes.size() - 1)) && (indexes.get(i) == this.charset.length() - 1)) {
-				
+
 					increase = true;
 					indexes.set(i, 0);
-					
+
 				} else if (i == (indexes.size() - 1)) {
-		
+
 					indexes.set(i, indexes.get(i) + 1);
 					increase = false;
 
 					break;
 				} else if (increase == true) {
-			
+
 					if (indexes.get(i) == this.charset.length() - 1) {
 						increase = true;
 						indexes.set(i, 0);
@@ -138,16 +204,14 @@ public class HashGenerator {
 			String string = new String(str);
 			NTLMPassword ntlm = new NTLMPassword();
 			byte[] bytes = ntlm.encodeBytes(string);
-			
-			
+
 			placeInBucket(bytes, string);
-			
+			if (z == numIncrement - 1) {
+				this.end = string;
+			}
 		}
 	}
-	
-	
-	
-	
+
 	/**
 	 * places byte array into bucket (LinkedList)
 	 * 
@@ -156,18 +220,17 @@ public class HashGenerator {
 	private void placeInBucket(byte[] value, String clearText) {
 		int index = binarySearch(this.bucketRanges, 0, this.bucketRanges.length - 1, new BigInteger(1, value));
 		// System.out.println(index);
-		
-		byte [] clearTextBytes = writePadChars(clearText.toCharArray(),5);
-		
+
+		byte[] clearTextBytes = writePadChars(clearText.toCharArray(), 5);
+
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
-		outputStream.write(clearTextBytes);
-		outputStream.write(value);
-		}
-		catch (Exception e){
+			outputStream.write(clearTextBytes);
+			outputStream.write(value);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		buckets[index].add(outputStream.toByteArray());
 	}
 
@@ -179,16 +242,29 @@ public class HashGenerator {
 		for (int i = 0; i < this.bucketRanges.length; i++) {
 			writeByteArraytoFile(convert1d(convertToArray(buckets[i])), i + ".dat");
 		}
+		updateBlockFile();
 
 	}
-	
+
+	private void updateBlockFile() {
+		File file = new File("blocks.txt");
+		try {
+			FileWriter fr = new FileWriter(file, true);
+			fr.write(this.start + "-" + this.end+"\n");
+			fr.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	/**
 	 * reads in specified file; returns BigInteger array of values to be analyzed
 	 * 
 	 * @param inputFilename
 	 * @return
 	 */
-	public LinkedList <BigInteger> verifyFile(String inputFilename) {
+	public LinkedList<BigInteger> verifyFile(String inputFilename) {
 
 		LinkedList<BigInteger> temp = new LinkedList<BigInteger>();
 
@@ -203,7 +279,6 @@ public class HashGenerator {
 				temp.add(new BigInteger(1, b));
 			}
 			is.close();
-		
 
 		} catch (IOException ioe) {
 			System.out.println("Error " + ioe.getMessage());
@@ -211,19 +286,19 @@ public class HashGenerator {
 		return temp;
 
 	}
-	
+
 	/**
 	 * returns buckets
 	 * 
 	 * @return
 	 */
-	public LinkedList<byte[]>[] getBuckets(){
-		
+	public LinkedList<byte[]>[] getBuckets() {
+
 		return buckets;
 	}
 
 	// HELPER FUNCTIONS
-	
+
 	/**
 	 * writes byte array to file
 	 * 
@@ -248,26 +323,27 @@ public class HashGenerator {
 		}
 
 	}
-	
+
 	private byte[] writePadChars(char array[], int num) {
-		char [] output = new char[num];
+		char[] output = new char[num];
 		int numZero = num - array.length;
-		byte [] bytearray = new byte[num];
-		
-		for (int i=0;i<array.length;i++) {
+		byte[] bytearray = new byte[num];
+
+		for (int i = 0; i < array.length; i++) {
 			output[i] = array[i];
 		}
-		
-		for (int i=0;i<numZero;i++) {
-				output[array.length+i] = (char)0;
+
+		for (int i = 0; i < numZero; i++) {
+			output[array.length + i] = (char) 0;
 		}
-		
-		for (int i=0;i<bytearray.length;i++) {
+
+		for (int i = 0; i < bytearray.length; i++) {
 			bytearray[i] = (byte) output[i];
 		}
 		return bytearray;
-		
+
 	}
+
 	/**
 	 * converts LinkedList of byte arrays to two dimensional byte array
 	 * 
@@ -279,7 +355,7 @@ public class HashGenerator {
 		arr = list.toArray(arr);
 		return arr;
 	}
-	
+
 	/**
 	 * finds index of given character in charset
 	 * 
@@ -294,8 +370,7 @@ public class HashGenerator {
 		}
 		return -1;
 	}
-	
-	
+
 	/**
 	 * converts two dimensional byte array to single dimensional
 	 * 
@@ -315,8 +390,9 @@ public class HashGenerator {
 	}
 
 	/**
-	 * Modified binary search, takes in array and target value. 
-	 * Returns index of closest lowest value.
+	 * Modified binary search, takes in array and target value. Returns index of
+	 * closest lowest value.
+	 * 
 	 * @param arr
 	 * @param l
 	 * @param r
@@ -331,11 +407,9 @@ public class HashGenerator {
 			if (arr[mid].compareTo(x) == 0)
 				return mid;
 
-
 			if (arr[mid].compareTo(x) == 1)
 				return binarySearch(arr, l, mid - 1, x);
 
-	
 			return binarySearch(arr, mid + 1, r, x);
 		} else {
 			int mid = l + (r - l) / 2;
@@ -357,8 +431,27 @@ public class HashGenerator {
 				}
 				return 0;
 			}
-		
+
 			return mid;
+		}
+	}
+
+	private Object ReadObjectFromFile(String filepath) {
+
+		try {
+
+			FileInputStream fileIn = new FileInputStream(filepath);
+			ObjectInputStream objectIn = new ObjectInputStream(fileIn);
+
+			Object obj = objectIn.readObject();
+
+		
+			objectIn.close();
+			return obj;
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return null;
 		}
 	}
 
