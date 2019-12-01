@@ -24,11 +24,6 @@ public class ZServer {
 			NTLMPassword ntlm = new NTLMPassword();
 			String encoded = ntlm.encode(string);
 
-
-            
-            //responder.send("World", 0);
-
-            //String response = Primes(replyInt);
             System.out.println("Sending \"" + replyString + " hashed"  + "\"");
             
             //responder.send(response.getBytes(ZMQ.CHARSET), 0);
@@ -40,28 +35,5 @@ public class ZServer {
         //context.term();
     }
 
-    public static String Primes(int num){
-        String returnString = "2 ";
-
-        if (num < 2){
-            returnString = "There are no primes below 2";
-            return returnString;
-        }
-
-        for (int i = 2; i <= num; i++){
-            
-            for(int j = 2; j < i; j++){
-                if (i % j == 0){
-                    break;
-                }
-                else if (j + 1 == i) {
-                    returnString += i + " ";
-                }
-            }
-            
-            
-        }
-        return returnString;
-    }
     
 }
