@@ -9,7 +9,7 @@ class TCPClient {
             Scanner scn = new Scanner(System.in);
 
             //InetAddress ip = InetAddress.getByName("localhost");
-            Socket server=new Socket("127.0.0.1", 7896); 
+            Socket server=new Socket("127.0.0.1", 5056); 
             DataInputStream dis=new DataInputStream(server.getInputStream());         
             DataOutputStream dos=new DataOutputStream(server.getOutputStream());
 

@@ -2,8 +2,9 @@ import java.io.*;
 import java.text.*; 
 import java.util.*; 
 import java.net.*; 
+import java.lang.*; 
 // ClientHandler class 
-class ClientHandler extends Thread  
+class ClientHandler extends Thread
 { 
     DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd"); 
     DateFormat fortime = new SimpleDateFormat("hh:mm:ss"); 
@@ -37,6 +38,40 @@ class ClientHandler extends Thread
 		}
     }
 
+    public static Boolean checkCompleted(String start) throws IOException {
+        File file = new File("BlockList.txt");
+        if(file.exists()){
+            PrintLine("Exists");
+        }
+        else {
+            PrintLine("Not Exists, creating new block list file");
+            file.createNewFile();
+        }
+        Scanner scanner = new Scanner(file);
+        String clearText, IDs;
+        PrintLine("Checking Block List for the block that starts with: " + start);
+        while(true){
+            while(scanner.hasNextLine()){
+                clearText = scanner.nextLine();
+                IDs = scanner.nextLine();
+                if(clearText.equals(start)){
+                    String message = new String(start + " marked as completed in block list by workers with ID: " + IDs);
+                    PrintLine(message);
+                    return true;
+                }
+            }
+            String message = new String("Block stating with \"" + start + "\" has not yet been completed and will be assigned");
+            PrintLine(message);
+            return false;
+        }
+    }
+    public static void Print(String str){ //Implemented quicker print methods to save time
+      System.out.print(str);
+    } 
+    public static void PrintLine(String str){
+      System.out.println(str);
+    } 
+
  
     // Constructor 
     public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos)  
@@ -51,6 +86,16 @@ class ClientHandler extends Thread
     { 
         String received; 
         String toreturn; 
+
+        try{
+            checkCompleted("a");
+            checkCompleted("thomas");
+            checkCompleted("m12lk");
+            checkCompleted("asd");
+        }catch(IOException e){
+            e.printStackTrace(); 
+        }
+        
         while (true)  
         { 
             try { 
