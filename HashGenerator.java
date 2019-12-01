@@ -20,8 +20,8 @@ public class HashGenerator {
 	private final String charset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 	private int numBuckets;
 	
-	private BigInteger[] bucketRanges;
-	private LinkedList<byte[]>[] buckets;
+	private BigInteger[] bucketRanges; //Starting "number" for bucket
+	private LinkedList<byte[]>[] buckets; //3D array of linked lists [Bucket][Hash][Clear]
 
 	/**
 	 * Paritionsize is the specified allocation size on hard disk by user in megabytes
@@ -91,7 +91,7 @@ public class HashGenerator {
 	
 		for (int z = 0; z < numIncrement; z++) {
 			boolean increase = false;
-			//
+			
 			for (int i = indexes.size() - 1; i >= -1; i--) {
 
 				if ((i == -1) && increase == true) {
