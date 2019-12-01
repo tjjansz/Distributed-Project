@@ -2,9 +2,6 @@ import org.zeromq.ZMQ;
 import java.util.Scanner;
 
 public class ZClient {
-	//java -classpath C:\Users\100631883\Desktop\Tools\JeroMQ\jeromq.jar; ZServer
-	//java -classpath C:\Users\100631883\Desktop\Tools\JeroMQ\jeromq.jar; ZClient
-	//javac -classpath C:\Users\100631883\Desktop\Tools\JeroMQ\jeromq.jar *.java
 
     public static void main(String[] args) {
         ZMQ.Context context = ZMQ.context(1);
@@ -16,7 +13,7 @@ public class ZClient {
 
         System.out.println("Please enter a string value: ");
         String strVal = scn.nextLine();
-        //String request = String.valueOf(intVal);;
+        //String request = String.valueOf(intVal);
 
         System.out.println("Sending \"" + strVal + "\"");
 
