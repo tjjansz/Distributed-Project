@@ -9,12 +9,128 @@ import java.net.*;
   
 // Server class 
 public class Server  
-{ 
+{     
+    //for generating queue list
+    private static ArrayList <String> queueList = new ArrayList <String>();
+	private static int counter = 0;
+	private static boolean flag = false;
+	private static String charset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
+
+    private static void queueListBuilder(){
+        
+		File tmpDir = new File("QL.txt");
+		boolean exists = tmpDir.exists();
+
+		if (!exists) {
+            System.out.println("Building Queue List");
+            generateFunc("",5000000);
+			File file = new File("QL.txt");
+			try {
+				FileWriter fr = new FileWriter(file);
+				
+				for (int i=0;i<queueList.size();i++) {
+					fr.write(queueList.get(i)+"\n");
+				}
+				
+				fr.close();
+                System.out.println("...Done");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+        
+    }
+    private static int findIndexinCharset(char c) {
+		for (int i = 0; i < charset.length(); i++) {
+			if (c == charset.charAt(i)) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	private static void generateFunc(String start, int numIncrement) {
+		ArrayList<Integer> indexes = new ArrayList<Integer>();
+		
+		if (start.length() == 0) {
+            counter++;
+			queueList.add("");
+			String string = "" + charset.charAt(0);
+			numIncrement--;
+			flag = true;
+			generateFunc(string, numIncrement);
+			return;
+		}
+
+		for (int i = start.length() - 1; i >= 0; i--) {
+			indexes.add(findIndexinCharset(start.charAt(i)));
+		}
+
+		for (int z = 0; z < numIncrement; z++) {
+			boolean increase = false;
+			//
+			for (int i = indexes.size() - 1; i >= -1; i--) {
+				if ((i == -1) && increase == true) {
+					indexes.add(0);
+					increase = false;
+				}
+				if ((i == -1) && increase == false) {
+					break;
+				}
+				// if last character of working string & last character of charset
+				if ((i == (indexes.size() - 1)) && (indexes.get(i) ==charset.length() - 1)) {
+					increase = true;
+					indexes.set(i, 0);
+
+				} else if (i == (indexes.size() - 1)) {
+
+					indexes.set(i, indexes.get(i) + 1);
+					increase = false;
+
+					break;
+				} else if (increase == true) {
+
+					if (indexes.get(i) == charset.length() - 1) {
+						increase = true;
+						indexes.set(i, 0);
+					} else {
+						indexes.set(i, indexes.get(i) + 1);
+						increase = false;
+						break;
+					}
+				}
+
+			}
+
+			char[] str = new char[indexes.size()];
+			for (int i = indexes.size() - 1; i >= 0; i--) {
+				str[i] = charset.charAt(indexes.get(i));
+
+			}
+			String string = new String(str);
+			
+			if (z == numIncrement-1) {
+				counter++;
+                System.out.println(counter);
+                queueList.add(string);
+			
+				if (counter == 250) {
+					return;
+				}
+                generateFunc(string, 5000000);
+			}
+			
+		}
+	}
     public static void main(String[] args) throws IOException  
     { 
         // server is listening on port 5056 
         ServerSocket ss = new ServerSocket(5056); 
+
+        queueListBuilder();
           
+
+        System.out.println("Waiting for Connections...");
         // running infinite loop for getting 
         // client request 
         while (true)  

@@ -271,7 +271,7 @@ class ClientHandler extends Thread
                         //Add back to queue
                         break;
                     case CODE_READY:
-                        
+
                         dos.writeInt(CODE_GENERATE);
                         //Pop from work queue
                         //Check BL
