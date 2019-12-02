@@ -10,6 +10,7 @@ class ClientHandler extends Thread
     final DataInputStream dis; 
     final DataOutputStream dos; 
     final Socket s; 
+    boolean search;
     
     final int CODE_INIT = 110; //To Server to initialize node
     final int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
@@ -197,7 +198,7 @@ class ClientHandler extends Thread
         return false;
     }
     private static synchronized void addId(String id){
-        File file = new File("nodes.txt");
+        File file = new File("connections.txt");
 		try {
 			FileWriter fr = new FileWriter(file, true);
 			fr.write(id+"\n");
@@ -260,7 +261,16 @@ class ClientHandler extends Thread
                 searchFile.createNewFile();
             }
     }
-
+    private static synchronized int incrementMisses() throws FileNotFoundException, IOException{
+        BufferedReader br = new BufferedReader(new FileReader("misses.txt")); 
+    int count = Integer.parseInt(br.readLine()); 
+    br.close();
+    count++;
+    FileWriter fw = new FileWriter("misses.txt",false);
+    fw.write(count + "");
+    fw.close();
+    return count;
+    }
     private static synchronized void writeToSearchFile(String text) throws IOException {
         File searchFile = new File("search.txt");
         BufferedWriter writer = new BufferedWriter(new FileWriter(searchFile, false));  
@@ -296,12 +306,21 @@ class ClientHandler extends Thread
                         pw.close();
     }
  
+ private static synchronized int getNumConnections()throws FileNotFoundException, IOException{
+     BufferedReader reader = new BufferedReader(new FileReader("connections.txt"));
+int lines = 0;
+while (reader.readLine() != null) lines++;
+reader.close();
+return lines;
+ }
     // Constructor 
     public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos)  
     { 
         this.s = s; 
         this.dis = dis; 
         this.dos = dos; 
+        this.search = search;
+        
     } 
   
     @Override
@@ -311,13 +330,15 @@ class ClientHandler extends Thread
             String received; 
             String toreturn; 
             String currentStr = null;
-            
+            System.out.println("reading init code");
             int initCode = dis.readInt();
+            System.out.println("reading id");
             workerID = dis.readUTF();
-            intent = dis.readUTF();
+            addId(workerID);
+           // intent = dis.readUTF();
 
             checkSearch();
-
+/*
             if(intent.equals("SEARCH")){
                 String term = dis.readUTF();
                 String text = (term + "\n");
@@ -327,12 +348,14 @@ class ClientHandler extends Thread
             else if(intent.equals("GEN")){
 
             }
+            */
+            
             Print(workerID);
             
             while (!searchHasNext())  
             { 
-                Print("Scn doesnt have next");
-
+                Print("Search File Empty");
+                System.out.println("reading code");
                 int code = dis.readInt();
                 Print(code + "\n");
                 switch(code){
@@ -344,20 +367,25 @@ class ClientHandler extends Thread
                         writeCompleted(currentStr, workerID);
                         break;
                     case CODE_SEARCH_FAILED:
+                        //System.out.println("Not Found in " + workerID);
+                        if (incrementMisses() == getNumConnections()){
+                            System.out.println("Search String Not Found");
+                        }
                         break;
                     case CODE_GEN_FAILED:
                         String failed = dis.readUTF();
                         //Add back to queue
                         break;
                     case CODE_READY:
+                         System.out.println("writing generate code");
                         dos.writeInt(CODE_GENERATE);
                         //Pop from work queue
                         //Check BL
                         //Send to client if not complete
                         currentStr = getNextinQueue();
-                        if (currentStr!=null){
+                        
                         dos.writeUTF(currentStr);
-                        }
+                        
                         //Wait for completion at dis.readInt()
                         
                         break;
@@ -367,7 +395,7 @@ class ClientHandler extends Thread
 
 
             }
-           
+           //Search file not empty
             while (!isSearchEmpty())  
             { 
                 String term = searchString();
@@ -377,6 +405,7 @@ class ClientHandler extends Thread
                 switch(code){
                     case CODE_SEARCH_FINISHED:
                         String decoded = dis.readUTF();
+
                         clearSearchFile();
                         PrintLine(decoded);
                         break;
@@ -385,6 +414,9 @@ class ClientHandler extends Thread
                         writeCompleted(currentStr, workerID);
                         break;
                     case CODE_SEARCH_FAILED:
+                        if (incrementMisses() == getNumConnections()){
+                            System.out.println("Search String Not Found");
+                        }
                         break;
                     case CODE_GEN_FAILED:
                         String failed = dis.readUTF();

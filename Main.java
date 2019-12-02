@@ -48,19 +48,16 @@ public class Main {
             DataInputStream dis = new DataInputStream(s.getInputStream()); 
             DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
 
-            Scanner scn = new Scanner(System.in); 
-            Print("Enter SEARCH to search a word, and GEN to participate in the decoding");
-            String intent = scn.nextLine();
-
-            Boolean genFlag = true;
             
       
             // the following loop performs the exchange of 
             // information between client and client handler 
+            System.out.println("writing init code");
             dos.writeInt(CODE_INIT); //CODE_INIT
+            System.out.println("writing id");
             dos.writeUTF(id);
-            dos.writeUTF(intent);
-
+           // dos.writeUTF(intent);
+            /*
             if (intent.equals("SEARCH")){
                 Print("Enter a word to search\n");
                 String term = scn.nextLine();
@@ -71,17 +68,24 @@ public class Main {
             if(intent.equals("GEN")){
                 dos.writeInt(CODE_READY);//CODE_READY
             }
+            */
+            System.out.println("writing ready code");
+            dos.writeInt(CODE_READY);
             
             while (true)  
             {     
+                
                int code = dis.readInt();
+               System.out.println("reading code");
                Print(Integer.toString(code) + "\n");
                switch(code){
                     case CODE_SEARCH:
                         String target = dis.readUTF();
                         //Generate rainbow fragment
                         NTLMPassword temp = new NTLMPassword();
+                        System.out.println("Starting Search");
 			            String result = Search.searchAll(temp.encodeBytes(target));
+                        System.out.println("Done Search");
                         if (!result.equals("Not Found")){
                             dos.writeInt(CODE_SEARCH_FINISHED);
                             dos.writeUTF(result);
