@@ -223,23 +223,6 @@ class ClientHandler extends Thread
     { 
         String received; 
         String toreturn; 
-
-        // try{
-        //     if(!checkCompleted("a")){
-        //         writeCompleted("a", "123e4567-e89b-12d3-a456-426655440000");
-        //     };
-        //     if(!checkCompleted("thomas")){
-        //         writeCompleted("thomas", "123e4567-e89b-12d3-a456-426655440000");
-        //     };
-        //     if(!checkCompleted("m12lk")){
-        //         writeCompleted("m12lk", "123e4567-e89b-12d3-a456-426655440000");
-        //     };
-        //     if(!checkCompleted("new")){
-        //         writeCompleted("new", "123e4567-e89b-12d3-a456-426655440000");
-        //     };
-        // }catch(IOException e){
-        //     e.printStackTrace(); 
-        // }
         
         while (true)  
         { 
@@ -253,9 +236,11 @@ class ClientHandler extends Thread
             // final int CODE_READY = 117; //To Server to notify ready
             try { 
                 int code = dis.readInt();
+                Print(code + "\n");
                 switch(code){
                     case CODE_INIT://CODE_INIT
                         workerID = dis.readUTF();
+                        Print(workerID);
                         break;
                     case CODE_SEARCH_FINISHED:
                         String decoded = dis.readUTF();
@@ -276,71 +261,29 @@ class ClientHandler extends Thread
                         //Pop from work queue
                         //Check BL
                         //Send to client if not complete
-                        dos.writeUTF("StringStart");
+                        dos.writeUTF("a");
                         //Wait for completion at dis.readInt()
                         
                         break;
-                    case default:
+                    default:
                         break;
                 }
 
-                // receive the answer from client 
-                received = dis.readUTF(); 
-                  while (!received.equals("Exit")){
-                  if (!idExists(received)){
-                      dos.writeUTF(received);
-                      addId(received);
-                  }
-                  else{
-                    dos.writeUTF("exists");  
-                  }
-                  try{
-                  Thread.sleep(1000);
-                  }catch(Exception e){}
-                  }
-             
-                  
-                // creating Date object 
-                Date date = new Date(); 
-                DateFormat fordate = new SimpleDateFormat("yyyy/MM/dd"); 
-                DateFormat fortime = new SimpleDateFormat("hh:mm:ss"); 
-                fordate.format(date); 
-                fortime.format(date); 
-                  
-                // write on output stream based on the 
-                // answer from the client 
-                switch (received) { 
-                  
-                    case "Date" : 
-                        toreturn = fordate.format(date); 
-                        dos.writeUTF(toreturn); 
-                        break; 
-                          
-                    case "Time" : 
-                        toreturn = fortime.format(date); 
-                        dos.writeUTF(toreturn); 
-                        break; 
-                          
-                    default: 
-                        dos.writeUTF("Invalid input"); 
-                        break; 
-                } 
             } catch (IOException e) { 
                 System.out.println(e);
-            break;
             } 
         } 
           
-        try
-        { 
-            // closing resources 
-            this.dis.close(); 
-            this.dos.close(); 
+        // try
+        // { 
+        //     // closing resources 
+        //     this.dis.close(); 
+        //     this.dos.close(); 
               
-        }catch(IOException e){ 
-            e.printStackTrace(); 
+        // }catch(IOException e){ 
+        //     e.printStackTrace(); 
             
-        }
+        // }
 
 
     }

@@ -10,14 +10,14 @@ import java.util.*;
 import java.net.*; 
 
 public class Main {
-    int CODE_INIT = 110; //To Server to initialize node
-    int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
-    int CODE_GEN_FINISHED = 112; //To Server block generation compelete and stored
-    int CODE_SEARCH = 113; //From Server sent hash to resolve
-    int CODE_GENERATE = 114; //From Server sent block for work
-    int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
-    int CODE_GEN_FAILED = 116; //To Server block generation failed
-    int CODE_READY = 117; //To Server to notify ready
+    final static int CODE_INIT = 110; //To Server to initialize node
+    final static int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
+    final static int CODE_GEN_FINISHED = 112; //To Server block generation compelete and stored
+    final static int CODE_SEARCH = 113; //From Server sent hash to resolve
+    final static int CODE_GENERATE = 114; //From Server sent block for work
+    final static int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
+    final static int CODE_GEN_FAILED = 116; //To Server block generation failed
+    final static int CODE_READY = 117; //To Server to notify ready
     
     
 	//creates file structure and generates first block
@@ -34,9 +34,9 @@ public class Main {
 	}
 	public static void main(String argvs[]) {
 		HashGenerator test = new HashGenerator(200*1024);
-        int id = test.getID;
-		 try
-        { 
+        String id = test.getId();
+		 
+        try{ 
             Scanner scn = new Scanner(System.in); 
               
             // getting localhost ip 
@@ -57,12 +57,13 @@ public class Main {
             dos.writeInt(CODE_READY);//CODE_READY
             while (true)  
             {     
-               dis.readInt();
+               int code = dis.readInt();
+               Print(Integer.toString(code) + "\n");
                switch(code){
                     case CODE_SEARCH:
                         String target = dis.readUTF();
                         //Generate rainbow fragment
-                        if ("function returns ok"){
+                        if (true){
                             dos.writeInt(CODE_SEARCH_FINISHED);
                             dos.writeUTF("decoded text");
                         }else{
@@ -72,16 +73,18 @@ public class Main {
                     case CODE_GENERATE:
                         String start = dis.readUTF();
                         //Generate rainbow fragment
+                        Print(start);
                         try{
                             test.generate(start); 
 		                    test.writeToFiles();
                             dos.writeInt(CODE_GEN_FINISHED);
+                            Print("Finished");
                         }catch (Exception e) {
                             dos.writeInt(CODE_GEN_FAILED);
                             dos.writeUTF(start);
                         }
                         break;
-                    case default:
+                    default:
                         break;
                 }
                   
@@ -101,5 +104,8 @@ public class Main {
             
         } 
 	}
+    static void Print(String str){
+        System.out.println(str);
+    }
 }
 
