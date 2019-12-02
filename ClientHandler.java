@@ -12,14 +12,14 @@ class ClientHandler extends Thread
     final Socket s; 
     boolean search;
     
-    final int CODE_INIT = 110; //To Server to initialize node
-    final int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
-    final int CODE_GEN_FINISHED = 112; //To Server block generation compelete and stored
-    final int CODE_SEARCH = 113; //From Server sent hash to resolve
-    final int CODE_GENERATE = 114; //From Server sent block for work
-    final int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
-    final int CODE_GEN_FAILED = 116; //To Server block generation failed
-    final int CODE_READY = 117; //To Server to notify ready
+    final static int CODE_INIT = 110; //To Server to initialize node
+    final static int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
+    final static int CODE_GEN_FINISHED = 112; //To Server block generation compelete and stored
+    final static int CODE_SEARCH = 113; //From Server sent hash to resolve
+    final static int CODE_GENERATE = 114; //From Server sent block for work
+    final static int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
+    final static int CODE_GEN_FAILED = 116; //To Server block generation failed
+    final static int CODE_READY = 117; //To Server to notify ready
     
 
     //for generating queue list
@@ -338,6 +338,7 @@ return lines;
            // intent = dis.readUTF();
 
             checkSearch();
+            Print(workerID);
 /*
             if(intent.equals("SEARCH")){
                 String term = dis.readUTF();
@@ -349,88 +350,29 @@ return lines;
 
             }
             */
-            
-            Print(workerID);
-            
-            while (!searchHasNext())  
-            { 
-                System.out.println("Search File Empty. Awaiting code...");
-                int code = dis.readInt();
-                Print("Received code: " + codeToString(code) + "\n");
-                switch(code){
-                    case CODE_SEARCH_FINISHED:
-                        String decoded = dis.readUTF();
-                        PrintLine(decoded);
-                        break;
-                    case CODE_GEN_FINISHED:
-                        writeCompleted(currentStr, workerID);
-                        break;
-                    case CODE_SEARCH_FAILED:
-                        //System.out.println("Not Found in " + workerID);
-                        if (incrementMisses() == getNumConnections()){
-                            System.out.println("Search String Not Found");
-                        }
-                        break;
-                    case CODE_GEN_FAILED:
-                        String failed = dis.readUTF();
-                        //Add back to queue
-                        break;
-                    case CODE_READY:
-                         System.out.println("Writing generate code CODE_GENERATE");
-                        dos.writeInt(CODE_GENERATE);
-                        //Pop from work queue
-                        //Check BL
-                        //Send to client if not complete
-                        currentStr = getNextinQueue();
-                        
-                        dos.writeUTF(currentStr);
-                        
-                        //Wait for completion at dis.readInt()
-                        
-                        break;
-                    default:
-                        break;
+            while(true){
+                if(!searchHasNext()){
+                    try{
+                        GenerateCmd(currentStr);
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+                    
+                }else{
+                    try{
+                        String term = searchString();
+                        SearchCmd(term);
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                 }
-
-
             }
+            
+            
+            
+            
            //Search file not empty
-            while (!isSearchEmpty())  
-            { 
-                String term = searchString();
-
-                int code = dis.readInt();
-                Print(code + "\n");
-                switch(code){
-                    case CODE_SEARCH_FINISHED:
-                        String decoded = dis.readUTF();
-
-                        clearSearchFile();
-                        PrintLine(decoded);
-                        break;
-                    case CODE_GEN_FINISHED:
-                        
-                        writeCompleted(currentStr, workerID);
-                        break;
-                    case CODE_SEARCH_FAILED:
-                        if (incrementMisses() == getNumConnections()){
-                            System.out.println("Search String Not Found");
-                        }
-                        break;
-                    case CODE_GEN_FAILED:
-                        String failed = dis.readUTF();
-                        //Add back to queue
-                        break;
-                    case CODE_READY:
-                        dos.writeInt(CODE_SEARCH);
-                        dos.writeUTF(term);
-                        break;
-                    default:
-                        break;
-                }
-
-
-            }
+            
             // Print("Scn does have next"); 
             
             
@@ -449,6 +391,67 @@ return lines;
         
         }catch(IOException e){
             e.printStackTrace();
+        }
+    }
+
+    public void GenerateCmd(String currentStr) throws Exception{
+        while (!searchHasNext())  
+        { 
+            System.out.println("Search File Empty. Awaiting code...");
+            int code = dis.readInt();
+            Print("Received code: " + codeToString(code) + "\n");
+            switch(code){
+                case CODE_GEN_FINISHED: //Took out CODE_SEARCH_FINISHED/FAILED option (never used)
+                    writeCompleted(currentStr, workerID);
+                    Print("Worker " + workerID + " generagted block: " + currentStr + "\n");
+                    break;
+                case CODE_GEN_FAILED:
+                    String failed = dis.readUTF();
+                    //Add back to queue
+                    break;
+                case CODE_READY:
+                    System.out.println("Writing generate code CODE_GENERATE");
+                    dos.writeInt(CODE_GENERATE);
+                    //Pop from work queue
+                    //Check BL
+                    //Send to client if not complete
+                    currentStr = getNextinQueue();
+                    dos.writeUTF(currentStr);
+                    
+                    //Wait for completion at dis.readInt()
+                    
+                    break;
+                default:
+                    break;
+            }
+        }
+
+    }
+
+    private void SearchCmd(String term) throws Exception{
+        while (!isSearchEmpty())  
+        { 
+            int code = dis.readInt();
+            Print(code + "\n");
+            switch(code){
+                case CODE_SEARCH_FINISHED: //Took out CODE_GEN_FINISHED/FAILED option (never used)
+                    String decoded = dis.readUTF();
+
+                    clearSearchFile();
+                    PrintLine("Retrieved cleartext value: " + decoded + " , " + term);
+                    return; //Return once seach is completed
+                case CODE_SEARCH_FAILED:
+                    if (incrementMisses() == getNumConnections()){
+                        System.out.println("Search String Not Found");
+                    }
+                    return;
+                case CODE_READY:
+                    dos.writeInt(CODE_SEARCH);
+                    dos.writeUTF(term);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

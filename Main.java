@@ -89,6 +89,8 @@ public class Main {
                         if (!result.equals("Not Found")){
                             dos.writeInt(CODE_SEARCH_FINISHED);
                             dos.writeUTF(result);
+                            Print("Finished and retrieved string: " + result + "\n");
+                            dos.writeInt(CODE_READY);
                         }else{
                             dos.writeInt(CODE_SEARCH_FAILED);
                         }
