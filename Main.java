@@ -74,11 +74,11 @@ public class Main {
             
             while (true)  
             {     
-                
-               int code = dis.readInt();
-               System.out.println("reading code");
-               Print(Integer.toString(code) + "\n");
-               switch(code){
+                System.out.println("Waiting for code...");
+                int code = dis.readInt();
+                //System.out.println("Reading code");
+                Print("Received code: " + codeToString(code) + "\n");
+                switch(code){
                     case CODE_SEARCH:
                         String target = dis.readUTF();
                         //Generate rainbow fragment
@@ -131,6 +131,28 @@ public class Main {
 	}
     static void Print(String str){
         System.out.println(str);
+    }
+    static String codeToString(int code){
+        switch(code){
+            case 110:
+                return "CODE_INIT";
+            case 111:
+                return "CODE_SEARCH_FINISHED";
+            case 112:
+                return "CODE_GEN_FINISHED";
+            case 113:
+                return "CODE_SEARCH";
+            case 114:
+                return "CODE_GENERATE";
+            case 115:
+                return "CODE_SEARCH_FAILED";
+            case 116:
+                return "CODE_GEN_FAILED";
+            case 117:
+                return "CODE_READY";
+            default:
+                return "NOT_A_CODE";
+        }
     }
 }
 

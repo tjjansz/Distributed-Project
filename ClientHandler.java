@@ -330,9 +330,9 @@ return lines;
             String received; 
             String toreturn; 
             String currentStr = null;
-            System.out.println("reading init code");
+            System.out.println("Reading init code");
             int initCode = dis.readInt();
-            System.out.println("reading id");
+            System.out.println("Reading id");
             workerID = dis.readUTF();
             addId(workerID);
            // intent = dis.readUTF();
@@ -354,10 +354,9 @@ return lines;
             
             while (!searchHasNext())  
             { 
-                Print("Search File Empty");
-                System.out.println("reading code");
+                System.out.println("Search File Empty. Awaiting code...");
                 int code = dis.readInt();
-                Print(code + "\n");
+                Print("Received code: " + codeToString(code) + "\n");
                 switch(code){
                     case CODE_SEARCH_FINISHED:
                         String decoded = dis.readUTF();
@@ -377,7 +376,7 @@ return lines;
                         //Add back to queue
                         break;
                     case CODE_READY:
-                         System.out.println("writing generate code");
+                         System.out.println("Writing generate code CODE_GENERATE");
                         dos.writeInt(CODE_GENERATE);
                         //Pop from work queue
                         //Check BL
@@ -450,6 +449,29 @@ return lines;
         
         }catch(IOException e){
             e.printStackTrace();
+        }
+    }
+
+    static String codeToString(int code){
+        switch(code){
+            case 110:
+                return "CODE_INIT";
+            case 111:
+                return "CODE_SEARCH_FINISHED";
+            case 112:
+                return "CODE_GEN_FINISHED";
+            case 113:
+                return "CODE_SEARCH";
+            case 114:
+                return "CODE_GENERATE";
+            case 115:
+                return "CODE_SEARCH_FAILED";
+            case 116:
+                return "CODE_GEN_FAILED";
+            case 117:
+                return "CODE_READY";
+            default:
+                return "NOT_A_CODE";
         }
     }
 } 
