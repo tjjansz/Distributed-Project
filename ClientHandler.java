@@ -11,6 +11,50 @@ class ClientHandler extends Thread
     final DataOutputStream dos; 
     final Socket s; 
 
+
+
+	static String getNextinQueue() {
+
+		File file = new File("QL.txt");
+
+		//returns null if file empty
+		if (file.length()==0){
+			return null;
+		}
+
+		System.out.println("Running");
+		String line = null;
+		ArrayList<String> list = new ArrayList<String>();
+		System.out.println("Reading File");
+		try {
+			Scanner s = new Scanner(new File("QL.txt"));
+
+			while (s.hasNextLine()) {
+				list.add(s.nextLine());
+			}
+
+			s.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		line = list.get(0);
+		list.remove(0);
+
+
+	try {
+		FileWriter fw = new FileWriter("QL.txt",false);
+		
+		for (int i=0;i<list.size();i++) {
+			fw.write(list.get(i) +"\n");
+		}
+		fw.close();
+		
+	}catch(Exception e) {
+		e.printStackTrace();
+	}
+
+	return line;
+    }
     private static synchronized boolean idExists(String id){
         try {
 			Scanner scanner = new Scanner(new File("nodes.txt"));
