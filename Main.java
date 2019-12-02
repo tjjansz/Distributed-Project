@@ -37,7 +37,6 @@ public class Main {
         String id = test.getId();
 		 
         try{ 
-            Scanner scn = new Scanner(System.in); 
               
             // getting localhost ip 
             InetAddress ip = InetAddress.getByName("localhost"); 
@@ -48,13 +47,31 @@ public class Main {
             // obtaining input and out streams 
             DataInputStream dis = new DataInputStream(s.getInputStream()); 
             DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
+
+            Scanner scn = new Scanner(System.in); 
+            Print("Enter SEARCH to search a word, and GEN to participate in the decoding");
+            String intent = scn.nextLine();
+
+            Boolean genFlag = true;
+            
       
             // the following loop performs the exchange of 
             // information between client and client handler 
             dos.writeInt(CODE_INIT); //CODE_INIT
             dos.writeUTF(id);
+            dos.writeUTF(intent);
 
-            dos.writeInt(CODE_READY);//CODE_READY
+            if (intent.equals("SEARCH")){
+                Print("Enter a word to search\n");
+                String term = scn.nextLine();
+                dos.writeUTF(term);
+                genFlag = false;
+                dos.writeInt(CODE_READY);
+            }
+            if(intent.equals("GEN")){
+                dos.writeInt(CODE_READY);//CODE_READY
+            }
+            
             while (true)  
             {     
                int code = dis.readInt();
@@ -63,9 +80,11 @@ public class Main {
                     case CODE_SEARCH:
                         String target = dis.readUTF();
                         //Generate rainbow fragment
-                        if (true){
+                        NTLMPassword temp = new NTLMPassword();
+			            String result = Search.searchAll(temp.encodeBytes(target));
+                        if (!result.equals("Not Found")){
                             dos.writeInt(CODE_SEARCH_FINISHED);
-                            dos.writeUTF("decoded text");
+                            dos.writeUTF(result);
                         }else{
                             dos.writeInt(CODE_SEARCH_FAILED);
                         }

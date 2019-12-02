@@ -28,6 +28,7 @@ class ClientHandler extends Thread
 	private static String charset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
     private String workerID;
+    private String intent;
 
 
     private static void queueListBuilder(){
@@ -265,33 +266,50 @@ class ClientHandler extends Thread
     @Override
     public void run()  
     { 
-        String received; 
-        String toreturn; 
-        
-        while (true)  
-        { 
-            // final int CODE_INIT = 110; //To Server to initialize node
-            // final int CODE_SEARCH_FINISHED = 111; //To Server block generation compelete and stored
-            // final int CODE_GEN_FINISHED = 112; //To Server block generation compelete and stored
-            // final int CODE_SEARCH = 113; //From Server sent hash to resolve
-            // final int CODE_GENERATE = 114; //From Server sent block for work
-            // final int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
-            // final int CODE_GEN_FAILED = 116; //To Server block generation failed
-            // final int CODE_READY = 117; //To Server to notify ready
-            try { 
+        try{
+            String received; 
+            String toreturn; 
+            String currentStr = null;
+            
+            int initCode = dis.readInt();
+            workerID = dis.readUTF();
+            intent = dis.readUTF();
+
+            
+
+            File searchFile = new File("search.txt");
+            if(!searchFile.exists()){
+                PrintLine("Not Exists, creating new search file");
+                searchFile.createNewFile();
+            }
+            Scanner scn = new Scanner(searchFile); //For checking file
+
+            if(intent.equals("SEARCH")){
+                String term = dis.readUTF();
+                String text = (term + "\n");
+            
+                BufferedWriter writer = new BufferedWriter(new FileWriter(searchFile, false));  
+                writer.write(text);
+                writer.close();
+            }
+            else if(intent.equals("GEN")){
+
+            }
+            Print(workerID);
+            
+            while (!scn.hasNext())  
+            { 
+                Print("Scn doesnt have next");
+
                 int code = dis.readInt();
                 Print(code + "\n");
                 switch(code){
-                    case CODE_INIT://CODE_INIT
-                        workerID = dis.readUTF();
-                        Print(workerID);
-                        break;
                     case CODE_SEARCH_FINISHED:
                         String decoded = dis.readUTF();
                         PrintLine(decoded);
                         break;
                     case CODE_GEN_FINISHED:
-                        writeCompleted("StringStart", workerID);
+                        writeCompleted(currentStr, workerID);
                         break;
                     case CODE_SEARCH_FAILED:
                         break;
@@ -300,12 +318,12 @@ class ClientHandler extends Thread
                         //Add back to queue
                         break;
                     case CODE_READY:
-
                         dos.writeInt(CODE_GENERATE);
                         //Pop from work queue
                         //Check BL
                         //Send to client if not complete
-                        dos.writeUTF("a");
+                        currentStr = getNextinQueue();
+                        dos.writeUTF(currentStr);
                         //Wait for completion at dis.readInt()
                         
                         break;
@@ -313,23 +331,61 @@ class ClientHandler extends Thread
                         break;
                 }
 
-            } catch (IOException e) { 
-                System.out.println(e);
-            } 
-        } 
-          
-        // try
-        // { 
-        //     // closing resources 
-        //     this.dis.close(); 
-        //     this.dos.close(); 
-              
-        // }catch(IOException e){ 
-        //     e.printStackTrace(); 
+
+            }
+            scn.close();
+            while (!(searchFile.length() == 0))  
+            { 
+                Scanner scn2 = new Scanner(searchFile); //For checking file
+                String term = scn2.nextLine();
+
+                int code = dis.readInt();
+                Print(code + "\n");
+                switch(code){
+                    case CODE_SEARCH_FINISHED:
+                        String decoded = dis.readUTF();
+                        PrintWriter pw = new PrintWriter("search.txt");
+                        pw.close();
+                        PrintLine(decoded);
+                        break;
+                    case CODE_GEN_FINISHED:
+                        
+                        writeCompleted(currentStr, workerID);
+                        break;
+                    case CODE_SEARCH_FAILED:
+                        break;
+                    case CODE_GEN_FAILED:
+                        String failed = dis.readUTF();
+                        //Add back to queue
+                        break;
+                    case CODE_READY:
+                        dos.writeInt(CODE_SEARCH);
+                        dos.writeUTF(term);
+                        break;
+                    default:
+                        break;
+                }
+
+
+            }
+            // Print("Scn does have next"); 
             
-        // }
+            
+            // try
+            // { 
+            //     // closing resources 
+            //     this.dis.close(); 
+            //     this.dos.close(); 
+                
+            // }catch(IOException e){ 
+            //     e.printStackTrace(); 
+                
+            // }
 
 
+        
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
-
 } 
