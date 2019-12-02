@@ -70,9 +70,11 @@ public class HashGenerator {
 		}
 
 	}
-public String getId() {
-	return this.id;
-}
+
+	public String getId() {
+		return this.id;
+	}
+
 	private void generateId() {
 		// generate ID
 		UUID uuid = UUID.randomUUID();
@@ -80,7 +82,7 @@ public String getId() {
 
 		File file = new File("id.txt");
 		try {
-			FileWriter fr = new FileWriter(file, true);
+			FileWriter fr = new FileWriter(file, false);
 			fr.write(this.id);
 			fr.close();
 		} catch (Exception e) {
