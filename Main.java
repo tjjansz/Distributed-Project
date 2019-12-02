@@ -94,10 +94,12 @@ public class Main {
                         //Generate rainbow fragment
                         Print(start);
                         try{
+                            Print("Generating Block");
                             test.generate(start); 
 		                    test.writeToFiles();
-                            dos.writeInt(CODE_GEN_FINISHED);
                             Print("Finished");
+                            dos.writeInt(CODE_GEN_FINISHED);
+                            dos.writeInt(CODE_READY);
                         }catch (Exception e) {
                             dos.writeInt(CODE_GEN_FAILED);
                             dos.writeUTF(start);

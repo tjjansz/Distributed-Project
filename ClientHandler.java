@@ -139,7 +139,7 @@ class ClientHandler extends Thread
 
 
 
-	static String getNextinQueue() {
+	static synchronized String getNextinQueue() {
 
 		File file = new File("QL.txt");
 
@@ -207,7 +207,7 @@ class ClientHandler extends Thread
 		}
     }
 
-    public static Boolean checkCompleted(String start) throws IOException {
+    public static synchronized Boolean checkCompleted(String start) throws IOException {
         File file = new File("BlockList.txt");
         if(!file.exists()){
             PrintLine("Not Exists, creating new block list file");
@@ -253,7 +253,48 @@ class ClientHandler extends Thread
     public static void PrintLine(String str){
       System.out.println(str);
     } 
+    private static synchronized void checkSearch() throws IOException {
+            File searchFile = new File("search.txt");
+            if(!searchFile.exists()){
+                PrintLine("Not Exists, creating new search file");
+                searchFile.createNewFile();
+            }
+    }
 
+    private static synchronized void writeToSearchFile(String text) throws IOException {
+        File searchFile = new File("search.txt");
+        BufferedWriter writer = new BufferedWriter(new FileWriter(searchFile, false));  
+                writer.write(text);
+                writer.close();
+    } 
+
+    private static synchronized boolean isSearchEmpty(){
+ File searchFile = new File("search.txt");
+ if (searchFile.length()==0){
+     return true;
+ }
+ return false;
+    }
+
+    private static synchronized boolean searchHasNext()throws FileNotFoundException{
+        File searchFile = new File("search.txt");
+         Scanner scn = new Scanner(searchFile); //For checking file
+         boolean temp = scn.hasNext();
+         scn.close();
+         return temp;
+    }
+    private static synchronized String searchString() throws FileNotFoundException{
+        File searchFile = new File("search.txt");
+          Scanner scn2 = new Scanner(searchFile); //For checking file
+                String term = scn2.nextLine();
+                scn2.close();
+                return term;
+         
+    }
+    private static synchronized void clearSearchFile() throws FileNotFoundException{
+        PrintWriter pw = new PrintWriter("search.txt");
+                        pw.close();
+    }
  
     // Constructor 
     public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos)  
@@ -275,29 +316,20 @@ class ClientHandler extends Thread
             workerID = dis.readUTF();
             intent = dis.readUTF();
 
-            
-
-            File searchFile = new File("search.txt");
-            if(!searchFile.exists()){
-                PrintLine("Not Exists, creating new search file");
-                searchFile.createNewFile();
-            }
-            Scanner scn = new Scanner(searchFile); //For checking file
+            checkSearch();
 
             if(intent.equals("SEARCH")){
                 String term = dis.readUTF();
                 String text = (term + "\n");
             
-                BufferedWriter writer = new BufferedWriter(new FileWriter(searchFile, false));  
-                writer.write(text);
-                writer.close();
+               writeToSearchFile(text);
             }
             else if(intent.equals("GEN")){
 
             }
             Print(workerID);
             
-            while (!scn.hasNext())  
+            while (!searchHasNext())  
             { 
                 Print("Scn doesnt have next");
 
@@ -323,7 +355,9 @@ class ClientHandler extends Thread
                         //Check BL
                         //Send to client if not complete
                         currentStr = getNextinQueue();
+                        if (currentStr!=null){
                         dos.writeUTF(currentStr);
+                        }
                         //Wait for completion at dis.readInt()
                         
                         break;
@@ -333,19 +367,17 @@ class ClientHandler extends Thread
 
 
             }
-            scn.close();
-            while (!(searchFile.length() == 0))  
+           
+            while (!isSearchEmpty())  
             { 
-                Scanner scn2 = new Scanner(searchFile); //For checking file
-                String term = scn2.nextLine();
+                String term = searchString();
 
                 int code = dis.readInt();
                 Print(code + "\n");
                 switch(code){
                     case CODE_SEARCH_FINISHED:
                         String decoded = dis.readUTF();
-                        PrintWriter pw = new PrintWriter("search.txt");
-                        pw.close();
+                        clearSearchFile();
                         PrintLine(decoded);
                         break;
                     case CODE_GEN_FINISHED:
