@@ -20,6 +20,7 @@ class ClientHandler extends Thread
     final static int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
     final static int CODE_GEN_FAILED = 116; //To Server block generation failed
     final static int CODE_READY = 117; //To Server to notify ready
+    final static int CODE_STALL = 118; //From Server to notify no work
     
 
     //for generating queue list
@@ -353,12 +354,16 @@ return lines;
             while(true){
                 if(!searchHasNext()){
                     try{
-                        GenerateCmd(currentStr);
+                        currentStr = getNextinQueue();
+                        if(currentStr != null){
+                            GenerateCmd(currentStr);
+                        }
+                        
                     }catch(Exception e){
                         e.printStackTrace();
                     }
                     
-                }else{
+                }else if(searchHasNext()){
                     try{
                         String term = searchString();
                         SearchCmd(term);
@@ -367,27 +372,6 @@ return lines;
                     }
                 }
             }
-            
-            
-            
-            
-           //Search file not empty
-            
-            // Print("Scn does have next"); 
-            
-            
-            // try
-            // { 
-            //     // closing resources 
-            //     this.dis.close(); 
-            //     this.dos.close(); 
-                
-            // }catch(IOException e){ 
-            //     e.printStackTrace(); 
-                
-            // }
-
-
         
         }catch(IOException e){
             e.printStackTrace();
@@ -399,23 +383,30 @@ return lines;
         { 
             System.out.println("Search File Empty. Awaiting code...");
             int code = dis.readInt();
+ 
             Print("Received code: " + codeToString(code) + "\n");
+
             switch(code){
                 case CODE_GEN_FINISHED: //Took out CODE_SEARCH_FINISHED/FAILED option (never used)
                     writeCompleted(currentStr, workerID);
-                    Print("Worker " + workerID + " generagted block: " + currentStr + "\n");
-                    break;
+                    Print("Worker " + workerID + " generated block: " + currentStr + "\n");
+                    return;
                 case CODE_GEN_FAILED:
                     String failed = dis.readUTF();
                     //Add back to queue
                     break;
                 case CODE_READY:
+                    
+                    if (currentStr == null){
+                        Print("Queue is empty\n");
+                        dos.writeInt(CODE_STALL);
+                        return;
+                    }
                     System.out.println("Writing generate code CODE_GENERATE");
                     dos.writeInt(CODE_GENERATE);
                     //Pop from work queue
                     //Check BL
                     //Send to client if not complete
-                    currentStr = getNextinQueue();
                     dos.writeUTF(currentStr);
                     
                     //Wait for completion at dis.readInt()
@@ -438,11 +429,13 @@ return lines;
                     String decoded = dis.readUTF();
 
                     clearSearchFile();
-                    PrintLine("Retrieved cleartext value: " + decoded + " , " + term);
+                    PrintLine("Retrieved cleartext value: " + decoded);
                     return; //Return once seach is completed
                 case CODE_SEARCH_FAILED:
                     if (incrementMisses() == getNumConnections()){
                         System.out.println("Search String Not Found");
+                        clearSearchFile();
+                        createFile("misses.txt","0");
                     }
                     return;
                 case CODE_READY:
@@ -454,6 +447,18 @@ return lines;
             }
         }
     }
+
+    private static synchronized void createFile(String filename, String content) {
+		try {
+            File file = new File(filename);
+            FileWriter fw = new FileWriter(file,false);
+            fw.write(content);
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		
+	}
 
     static String codeToString(int code){
         switch(code){
@@ -473,6 +478,8 @@ return lines;
                 return "CODE_GEN_FAILED";
             case 117:
                 return "CODE_READY";
+            case 118:
+                return "CODE_STALL";
             default:
                 return "NOT_A_CODE";
         }

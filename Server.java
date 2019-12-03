@@ -139,27 +139,21 @@ public class Server
 
         queueListBuilder();
 		createFile("connections.txt","");
-        Scanner scn = new Scanner(System.in); 
-        System.out.println("Enter SEARCH to search a word, and GEN to participate in the decoding");
-        String intent = scn.nextLine();
 
-        if (intent.equalsIgnoreCase("search")){
-                System.out.println("Enter value you want to find: ");
-                String target = scn.nextLine();
-                createFile("misses.txt","0");
-                File searchFile = new File ("search.txt");
-                try{
-                    FileWriter fw = new FileWriter("search.txt",false);
-                    fw.write(target);
-                    fw.close();
-                }catch(Exception e){
-                e.printStackTrace();
-                }
-            if(!searchFile.exists()){
-                System.out.println("Not Exists, creating new search file");
-                searchFile.createNewFile();
-            }
+        createFile("misses.txt","0");
+        File searchFile = new File ("search.txt");
+        // try{
+        //     FileWriter fw = new FileWriter("search.txt",false);
+        //     fw.write(target);
+        //     fw.close();
+        // }catch(Exception e){
+        // e.printStackTrace();
+        // }
+        if(!searchFile.exists()){
+            System.out.println("Not Exists, creating new search file");
+            searchFile.createNewFile();
         }
+
 
         System.out.println("Waiting for Connections...");
         // running infinite loop for getting 

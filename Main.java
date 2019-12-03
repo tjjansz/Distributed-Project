@@ -18,6 +18,7 @@ public class Main {
     final static int CODE_SEARCH_FAILED = 115; //To Server hash resolution failed
     final static int CODE_GEN_FAILED = 116; //To Server block generation failed
     final static int CODE_READY = 117; //To Server to notify ready
+    final static int CODE_STALL = 118; //From Server to notify no work
     
     
 	//creates file structure and generates first block
@@ -76,7 +77,7 @@ public class Main {
             {     
                 System.out.println("Waiting for code...");
                 int code = dis.readInt();
-                //System.out.println("Reading code");
+                System.out.println("Reading code");
                 Print("Received code: " + codeToString(code) + "\n");
                 switch(code){
                     case CODE_SEARCH:
@@ -93,6 +94,7 @@ public class Main {
                             dos.writeInt(CODE_READY);
                         }else{
                             dos.writeInt(CODE_SEARCH_FAILED);
+                            dos.writeInt(CODE_READY);
                         }
                         break;
                     case CODE_GENERATE:
@@ -110,6 +112,9 @@ public class Main {
                             dos.writeInt(CODE_GEN_FAILED);
                             dos.writeUTF(start);
                         }
+                        break;
+                    case CODE_STALL:
+                        dos.writeInt(CODE_READY);
                         break;
                     default:
                         break;
@@ -152,6 +157,8 @@ public class Main {
                 return "CODE_GEN_FAILED";
             case 117:
                 return "CODE_READY";
+            case 118:
+                return "CODE_STALL";
             default:
                 return "NOT_A_CODE";
         }
