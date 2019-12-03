@@ -429,6 +429,7 @@ return lines;
                     String decoded = dis.readUTF();
 
                     clearSearchFile();
+                    createFile("misses.txt","0");
                     PrintLine("Retrieved cleartext value: " + decoded);
                     return; //Return once seach is completed
                 case CODE_SEARCH_FAILED:

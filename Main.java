@@ -83,9 +83,10 @@ public class Main {
                     case CODE_SEARCH:
                         String target = dis.readUTF();
                         //Generate rainbow fragment
-                        NTLMPassword temp = new NTLMPassword();
+                       
                         System.out.println("Starting Search");
-			            String result = Search.searchAll(temp.encodeBytes(target));
+			            String result = search(target);
+                        
                         System.out.println("Done Search");
                         if (!result.equals("Not Found")){
                             dos.writeInt(CODE_SEARCH_FINISHED);
