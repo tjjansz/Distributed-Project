@@ -47,9 +47,7 @@ public class Main {
       
             // obtaining input and out streams 
             DataInputStream dis = new DataInputStream(s.getInputStream()); 
-            DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
-
-            
+            DataOutputStream dos = new DataOutputStream(s.getOutputStream());
       
             // the following loop performs the exchange of 
             // information between client and client handler 
@@ -57,19 +55,7 @@ public class Main {
             dos.writeInt(CODE_INIT); //CODE_INIT
             System.out.println("writing id");
             dos.writeUTF(id);
-           // dos.writeUTF(intent);
-            /*
-            if (intent.equals("SEARCH")){
-                Print("Enter a word to search\n");
-                String term = scn.nextLine();
-                dos.writeUTF(term);
-                genFlag = false;
-                dos.writeInt(CODE_READY);
-            }
-            if(intent.equals("GEN")){
-                dos.writeInt(CODE_READY);//CODE_READY
-            }
-            */
+
             System.out.println("writing ready code");
             dos.writeInt(CODE_READY);
             
@@ -119,9 +105,6 @@ public class Main {
                     default:
                         break;
                 }
-                  
-                // If client sends exit,close this connection  
-                // and then break from the while loop 
                 
             } 
               

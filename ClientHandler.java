@@ -22,7 +22,6 @@ class ClientHandler extends Thread
     final static int CODE_READY = 117; //To Server to notify ready
     final static int CODE_STALL = 118; //From Server to notify no work
     
-
     //for generating queue list
     private static ArrayList <String> queueList = new ArrayList <String>();
 	private static int counter = 0;
@@ -32,11 +31,9 @@ class ClientHandler extends Thread
     private String workerID;
     private String intent;
 
-
     private static void queueListBuilder(){
         generateFunc("",5000000);
 		File tmpDir = new File("QL.txt");
-
 		boolean exists = tmpDir.exists();
 
 		if (!exists) {
@@ -47,7 +44,6 @@ class ClientHandler extends Thread
 				for (int i=0;i<queueList.size();i++) {
 					fr.write(queueList.get(i)+"\n");
 				}
-				
 				fr.close();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -64,7 +60,7 @@ class ClientHandler extends Thread
 	}
 	private static void generateFunc(String start, int numIncrement) {
 		ArrayList<Integer> indexes = new ArrayList<Integer>();
-		
+
 		if (start.length() == 0) {
 			queueList.add("");
 			String string = "" + charset.charAt(0);
@@ -93,12 +89,10 @@ class ClientHandler extends Thread
 				if ((i == (indexes.size() - 1)) && (indexes.get(i) ==charset.length() - 1)) {
 					increase = true;
 					indexes.set(i, 0);
-
 				} else if (i == (indexes.size() - 1)) {
 
 					indexes.set(i, indexes.get(i) + 1);
 					increase = false;
-
 					break;
 				} else if (increase == true) {
 
@@ -111,7 +105,6 @@ class ClientHandler extends Thread
 						break;
 					}
 				}
-
 			}
 
 			char[] str = new char[indexes.size()];
@@ -120,7 +113,6 @@ class ClientHandler extends Thread
 
 			}
 			String string = new String(str);
-			
 			if (z == 0) {
 				counter++;
 				if (flag) {
@@ -167,23 +159,21 @@ class ClientHandler extends Thread
 		}
 		line = list.get(0);
 		list.remove(0);
-
-
-	try {
-		FileWriter fw = new FileWriter("QL.txt",false);
-		
-		for (int i=0;i<list.size();i++) {
-			fw.write(list.get(i) +"\n");
-		}
-		fw.close();
-		
-	}catch(Exception e) {
-		e.printStackTrace();
-	}
-
-	return line;
+        try {
+            FileWriter fw = new FileWriter("QL.txt",false);
+            
+            for (int i=0;i<list.size();i++) {
+                fw.write(list.get(i) +"\n");
+            }
+            fw.close();
+            
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+            return line;
     }
-    private static synchronized boolean idExists(String id){
+
+    private static synchronized boolean idExists(String id) {
         try {
 			Scanner scanner = new Scanner(new File("nodes.txt"));
 			while (scanner.hasNextLine()) {
@@ -198,6 +188,7 @@ class ClientHandler extends Thread
         
         return false;
     }
+
     private static synchronized void addId(String id){
         File file = new File("connections.txt");
 		try {
@@ -234,7 +225,7 @@ class ClientHandler extends Thread
         }
     }
 
-    public static Boolean writeCompleted(String start, String workerID) throws IOException{
+    public static Boolean writeCompleted(String start, String workerID) throws IOException {
         String textToAppend = (start + "\n" + workerID);
         File file = new File("BlockList.txt");
         if(!file.exists()){
@@ -255,68 +246,66 @@ class ClientHandler extends Thread
     public static void PrintLine(String str){
       System.out.println(str);
     } 
-    private static synchronized void checkSearch() throws IOException {
-            File searchFile = new File("search.txt");
-            if(!searchFile.exists()){
-                PrintLine("Not Exists, creating new search file");
-                searchFile.createNewFile();
-            }
+    private static synchronized void checkSearch() throws IOException{
+        File searchFile = new File("search.txt");
+        if(!searchFile.exists()){
+            PrintLine("Not Exists, creating new search file");
+            searchFile.createNewFile();
+        }
     }
-    private static synchronized int incrementMisses() throws FileNotFoundException, IOException{
+    private static synchronized int incrementMisses() throws FileNotFoundException, IOException {
         BufferedReader br = new BufferedReader(new FileReader("misses.txt")); 
-    int count = Integer.parseInt(br.readLine()); 
-    br.close();
-    count++;
-    FileWriter fw = new FileWriter("misses.txt",false);
-    fw.write(count + "");
-    fw.close();
-    return count;
+        int count = Integer.parseInt(br.readLine()); 
+        br.close();
+        count++;
+        FileWriter fw = new FileWriter("misses.txt",false);
+        fw.write(count + "");
+        fw.close();
+        return count;
     }
     private static synchronized void writeToSearchFile(String text) throws IOException {
         File searchFile = new File("search.txt");
         BufferedWriter writer = new BufferedWriter(new FileWriter(searchFile, false));  
-                writer.write(text);
-                writer.close();
+        writer.write(text);
+        writer.close();
     } 
 
     private static synchronized boolean isSearchEmpty(){
- File searchFile = new File("search.txt");
- if (searchFile.length()==0){
-     return true;
- }
- return false;
+        File searchFile = new File("search.txt");
+        if (searchFile.length()==0){
+            return true;
+        }
+        return false;
     }
 
-    private static synchronized boolean searchHasNext()throws FileNotFoundException{
+    private static synchronized boolean searchHasNext()throws FileNotFoundException {
         File searchFile = new File("search.txt");
          Scanner scn = new Scanner(searchFile); //For checking file
          boolean temp = scn.hasNext();
          scn.close();
          return temp;
     }
-    private static synchronized String searchString() throws FileNotFoundException{
+    private static synchronized String searchString() throws FileNotFoundException {
         File searchFile = new File("search.txt");
-          Scanner scn2 = new Scanner(searchFile); //For checking file
-                String term = scn2.nextLine();
-                scn2.close();
-                return term;
-         
+        Scanner scn2 = new Scanner(searchFile); //For checking file
+            String term = scn2.nextLine();
+            scn2.close();
+            return term;
     }
-    private static synchronized void clearSearchFile() throws FileNotFoundException{
+    private static synchronized void clearSearchFile() throws FileNotFoundException {
         PrintWriter pw = new PrintWriter("search.txt");
-                        pw.close();
+        pw.close();
     }
  
- private static synchronized int getNumConnections()throws FileNotFoundException, IOException{
-     BufferedReader reader = new BufferedReader(new FileReader("connections.txt"));
-int lines = 0;
-while (reader.readLine() != null) lines++;
-reader.close();
-return lines;
- }
+    private static synchronized int getNumConnections()throws FileNotFoundException, IOException {
+        BufferedReader reader = new BufferedReader(new FileReader("connections.txt"));
+        int lines = 0;
+        while (reader.readLine() != null) lines++;
+        reader.close();
+        return lines;
+    }
     // Constructor 
-    public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos)  
-    { 
+    public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos) { 
         this.s = s; 
         this.dis = dis; 
         this.dos = dos; 
@@ -336,21 +325,10 @@ return lines;
             System.out.println("Reading id");
             workerID = dis.readUTF();
             addId(workerID);
-           // intent = dis.readUTF();
 
             checkSearch();
             Print(workerID);
-/*
-            if(intent.equals("SEARCH")){
-                String term = dis.readUTF();
-                String text = (term + "\n");
             
-               writeToSearchFile(text);
-            }
-            else if(intent.equals("GEN")){
-
-            }
-            */
             while(true){
                 if(!searchHasNext()){
                     try{
@@ -358,11 +336,9 @@ return lines;
                         if(currentStr != null){
                             GenerateCmd(currentStr);
                         }
-                        
                     }catch(Exception e){
                         e.printStackTrace();
                     }
-                    
                 }else if(searchHasNext()){
                     try{
                         String term = searchString();
@@ -372,7 +348,6 @@ return lines;
                     }
                 }
             }
-        
         }catch(IOException e){
             e.printStackTrace();
         }
