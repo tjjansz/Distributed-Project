@@ -1,4 +1,3 @@
-
 import java.math.BigInteger;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -21,7 +20,7 @@ public class Main {
     final static int CODE_STALL = 118; //From Server to notify no work
     
     
-	//Creates file structure and generates first block
+	// Creates file structure and generates first block
 	static HashGenerator init() {
 		 HashGenerator hgen = new HashGenerator(200*1024);
 		 hgen.generate(""); 
@@ -30,20 +29,20 @@ public class Main {
 	}
     
     /**
-     * 
-     * @param hexStr
-     * @return
+     * Searches the hash given in hex value
+     * @param hexStr hash to be searched
+     * @return either "not found" or the result exists and the result of readString method is returned
      */
 	static String search(String hexStr) {
 		BigInteger bigInt = new BigInteger(hexStr, 16);
 		return Search.searchAll(bigInt.toByteArray());
 	}
-	public static void main(String argvs[]) {
+
+    public static void main(String argvs[]) {
 		HashGenerator test = new HashGenerator(200*1024);
         String id = test.getId();
 		 
         try{ 
-              
             // getting localhost ip 
             InetAddress ip = InetAddress.getByName("localhost"); 
       
@@ -73,8 +72,8 @@ public class Main {
                 switch(code){
                     case CODE_SEARCH:
                         String target = dis.readUTF();
-                        //Generate rainbow fragment
-                       
+
+                        //Generate rainbow fragment          
                         System.out.println("Starting Search");
 			            String result = search(target);
                         
@@ -113,21 +112,18 @@ public class Main {
                 }
                 
             } 
-              
-            // closing resources 
-            /*
-            scn.close(); 
-            dis.close(); 
-            dos.close(); 
-            */
+
         }catch(Exception e){ 
             e.printStackTrace();
             
         } 
-	}
+    }
+    
     static void Print(String str){
         System.out.println(str);
     }
+
+    // Returns the string representation of the integer code
     static String codeToString(int code){
         switch(code){
             case 110:
@@ -143,7 +139,7 @@ public class Main {
             case 115:
                 return "CODE_SEARCH_FAILED";
             case 116:
-                return "CODE_GEN_FAILED";
+                return "CODE_GEN_FAILED";x  
             case 117:
                 return "CODE_READY";
             case 118:
@@ -153,4 +149,3 @@ public class Main {
         }
     }
 }
-
