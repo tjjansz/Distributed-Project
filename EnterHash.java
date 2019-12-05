@@ -1,8 +1,11 @@
+/**
+ * This class takes the hash value to be decrypted from the user 
+ * and writes into a file called search.txt
+ */
 import java.io.FileWriter;  
 import java.util.Scanner;
 
 public class EnterHash {
-
     public static void main (String argvs []){
 	while(true){
 
