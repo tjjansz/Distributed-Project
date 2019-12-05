@@ -1,7 +1,5 @@
-
 /*
  * This class' primary function is to generate large volume of hashes and the related storage functions/procedures
- * 
  */
 
 import java.util.UUID;
@@ -27,12 +25,8 @@ public class HashGenerator {
 		return this.end;
 	}
 
-	/**
-	 * Paritionsize is the specified allocation size on hard disk by user in
-	 * megabytes
-	 * 
-	 * @param parititionSize
-	 */
+	// Constructor
+	// parititionSize the specified allocation size on hard disk by user in megabytes
 	public HashGenerator(int parititionSize) {
 		if (parititionSize > 0) {
 			this.numBuckets = parititionSize / blockSize;
@@ -47,11 +41,11 @@ public class HashGenerator {
 				loadProfile();
 			} else {
 				instantiateBuckets();
-
 			}
 		}
 	}
 
+	// 
 	private void loadProfile() {
 		bucketRanges = (BigInteger[]) ReadObjectFromFile("index.ser");
 		buckets = (LinkedList<byte[]>[]) new LinkedList[bucketRanges.length];
@@ -68,13 +62,13 @@ public class HashGenerator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	public String getId() {
 		return this.id;
 	}
 
+	// Generate an ID for each node and write it into id.txt file
 	private void generateId() {
 		// generate ID
 		UUID uuid = UUID.randomUUID();
@@ -88,15 +82,9 @@ public class HashGenerator {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 	
-
-
-	/**
-	 * Instantiates buckets data structure
-	 * 
-	 */
+	// Instantiates buckets data structure
 	private void instantiateBuckets() {
 		bucketRanges = new BigInteger[this.numBuckets];
 		bucketRanges[0] = BigInteger.valueOf(0);
@@ -122,6 +110,7 @@ public class HashGenerator {
 
 	}
 
+	// Generate buckets which are made of linked lists
 	public void generate(String start) {
 		this.start = start;
 		for (int i = 0; i < buckets.length; i++) {
@@ -137,8 +126,8 @@ public class HashGenerator {
 	 * Would generate hashes for [b,c,d] in this case. It is not inclusive of
 	 * starting value
 	 * 
-	 * @param start
-	 * @param numIncrement
+	 * @param start The starting string
+	 * @param numIncrement Defines the upper limit for the hashes that are generated
 	 */
 	private void generateFunc(String start, int numIncrement) {
 		BigInteger[] array = new BigInteger[numIncrement];
@@ -215,14 +204,14 @@ public class HashGenerator {
 	}
 
 	/**
-	 * places byte array into bucket (LinkedList)
+	 * Places byte array into bucket (LinkedList)
 	 * 
-	 * @param value
+	 * @param value byte array to be placed within the bucket
+	 * @param clearText 
 	 */
 	private void placeInBucket(byte[] value, String clearText) {
 		int index = binarySearch(this.bucketRanges, 0, this.bucketRanges.length - 1, new BigInteger(1, value));
-		// System.out.println(index);
-
+		
 		byte[] clearTextBytes = writePadChars(clearText.toCharArray(), 5);
 
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -236,9 +225,7 @@ public class HashGenerator {
 		buckets[index].add(outputStream.toByteArray());
 	}
 
-	/**
-	 * Writes contents of buckets to file
-	 */
+	// Writes contents of buckets to file
 	public void writeToFiles() {
 
 		for (int i = 0; i < this.bucketRanges.length; i++) {
@@ -248,6 +235,7 @@ public class HashGenerator {
 
 	}
 
+	// Update the blocks.txt file with the start and end string values
 	private void updateBlockFile() {
 		File file = new File("blocks.txt");
 		try {
@@ -257,11 +245,10 @@ public class HashGenerator {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
-	 * reads in specified file; returns BigInteger array of values to be analyzed
+	 * Reads in specified file; returns BigInteger array of values to be analyzed
 	 * 
 	 * @param inputFilename
 	 * @return
@@ -289,11 +276,7 @@ public class HashGenerator {
 
 	}
 
-	/**
-	 * returns buckets
-	 * 
-	 * @return
-	 */
+	// Return buckets
 	public LinkedList<byte[]>[] getBuckets() {
 
 		return buckets;
@@ -302,10 +285,10 @@ public class HashGenerator {
 	// HELPER FUNCTIONS
 
 	/**
-	 * writes byte array to file
+	 * Writes byte array to file
 	 * 
-	 * @param bytes
-	 * @param filename
+	 * @param bytes byte array to be written to the file
+	 * @param filename the file name where the byte array will be written
 	 */
 	static void writeByteArraytoFile(byte[] bytes, String filename) {
 		try {
@@ -326,6 +309,15 @@ public class HashGenerator {
 
 	}
 
+	/**
+	 * This method transforms a character array into a byte array by
+	 * padding it with extra bits. The desired length of the byte array
+	 * is specified by the integer num
+	 * 
+	 * @param array character array that will be padded
+	 * @param num the fixed length of the character array we need
+	 * @return padded byte array
+	 */
 	private byte[] writePadChars(char array[], int num) {
 		char[] output = new char[num];
 		int numZero = num - array.length;
@@ -347,10 +339,10 @@ public class HashGenerator {
 	}
 
 	/**
-	 * converts LinkedList of byte arrays to two dimensional byte array
+	 * Converts LinkedList of byte arrays to two dimensional byte array
 	 * 
-	 * @param list
-	 * @return
+	 * @param list byte linked list to be converted into 2D byte array
+	 * @return 2D byte array is returned after the conversion
 	 */
 	private byte[][] convertToArray(LinkedList<byte[]> list) {
 		byte[][] arr = new byte[list.size()][];
@@ -359,10 +351,10 @@ public class HashGenerator {
 	}
 
 	/**
-	 * finds index of given character in charset
+	 * Finds index of given character in charset
 	 * 
 	 * @param c
-	 * @return
+	 * @return index is returned if found; if the index isn't found -1 is returned
 	 */
 	private int findIndexinCharset(char c) {
 		for (int i = 0; i < charset.length(); i++) {
@@ -374,10 +366,10 @@ public class HashGenerator {
 	}
 
 	/**
-	 * converts two dimensional byte array to single dimensional
+	 * Converts two dimensional byte array to single dimensional
 	 * 
-	 * @param input
-	 * @return
+	 * @param input 2D byte array
+	 * @return single dimensional array
 	 */
 	private byte[] convert1d(byte[][] input) {
 		int z = 0;
@@ -395,11 +387,11 @@ public class HashGenerator {
 	 * Modified binary search, takes in array and target value. Returns index of
 	 * closest lowest value.
 	 * 
-	 * @param arr
-	 * @param l
-	 * @param r
-	 * @param x
-	 * @return
+	 * @param arr array to be searched
+	 * @param l left side of the array
+	 * @param r right side of the array
+	 * @param x target value
+	 * @return index of closest value
 	 */
 	private int binarySearch(BigInteger arr[], int l, int r, BigInteger x) {
 
@@ -438,16 +430,19 @@ public class HashGenerator {
 		}
 	}
 
+	/**
+	 * This method reads an object from the specifed file path
+	 * 
+	 * @param filepath file path as string
+	 * @return Object that will be read
+	 */
 	private Object ReadObjectFromFile(String filepath) {
-
 		try {
-
 			FileInputStream fileIn = new FileInputStream(filepath);
 			ObjectInputStream objectIn = new ObjectInputStream(fileIn);
 
 			Object obj = objectIn.readObject();
 
-		
 			objectIn.close();
 			return obj;
 
@@ -456,5 +451,4 @@ public class HashGenerator {
 			return null;
 		}
 	}
-
 }
