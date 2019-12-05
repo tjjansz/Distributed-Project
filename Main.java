@@ -21,14 +21,19 @@ public class Main {
     final static int CODE_STALL = 118; //From Server to notify no work
     
     
-	//creates file structure and generates first block
+	//Creates file structure and generates first block
 	static HashGenerator init() {
 		 HashGenerator hgen = new HashGenerator(200*1024);
 		 hgen.generate(""); 
 		 hgen.writeToFiles();
 		 return hgen;
 	}
-	
+    
+    /**
+     * 
+     * @param hexStr
+     * @return
+     */
 	static String search(String hexStr) {
 		BigInteger bigInt = new BigInteger(hexStr, 16);
 		return Search.searchAll(bigInt.toByteArray());
