@@ -3,6 +3,7 @@ import java.text.*;
 import java.util.*; 
 import java.net.*; 
 import java.lang.*; 
+
 // ClientHandler class 
 class ClientHandler extends Thread
 { 
@@ -31,6 +32,7 @@ class ClientHandler extends Thread
     private String workerID;
     private String intent;
 
+    // Method that generates the queue within a text file
     private static void queueListBuilder(){
         generateFunc("",5000000);
 		File tmpDir = new File("QL.txt");
@@ -50,6 +52,12 @@ class ClientHandler extends Thread
 			}
 		}
     }
+
+    /**
+     * Find the index of a given character
+     * @param c character to be searched
+     * @return index of the character OR return -1 if character is not found
+     */
     private static int findIndexinCharset(char c) {
 		for (int i = 0; i < charset.length(); i++) {
 			if (c == charset.charAt(i)) {
@@ -57,7 +65,9 @@ class ClientHandler extends Thread
 			}
 		}
 		return -1;
-	}
+    }
+    
+    // Generates n permutations of character set hashes to be placed in a bucket
 	private static void generateFunc(String start, int numIncrement) {
 		ArrayList<Integer> indexes = new ArrayList<Integer>();
 
@@ -76,7 +86,6 @@ class ClientHandler extends Thread
 
 		for (int z = 0; z < numIncrement; z++) {
 			boolean increase = false;
-			//
 			for (int i = indexes.size() - 1; i >= -1; i--) {
 				if ((i == -1) && increase == true) {
 					indexes.add(0);
@@ -131,13 +140,12 @@ class ClientHandler extends Thread
 		}
 	}
 
-
-
+    // Get the next item in the queue
 	static synchronized String getNextinQueue() {
 
 		File file = new File("QL.txt");
 
-		//returns null if file empty
+		// returns null if file empty
 		if (file.length()==0){
 			return null;
 		}
@@ -173,6 +181,7 @@ class ClientHandler extends Thread
             return line;
     }
 
+    // Check if ID exits
     private static synchronized boolean idExists(String id) {
         try {
 			Scanner scanner = new Scanner(new File("nodes.txt"));
@@ -189,6 +198,7 @@ class ClientHandler extends Thread
         return false;
     }
 
+    // Add the ID into connections.txt file
     private static synchronized void addId(String id){
         File file = new File("connections.txt");
 		try {
@@ -200,6 +210,13 @@ class ClientHandler extends Thread
 		}
     }
 
+    /**
+     * This method creates a file that contains a list of blocks
+     * and checks if a certain block is completed by workers
+     * @param start The name of the block
+     * @return True or false depending on whether the block is completed or not
+     * @throws IOException
+     */
     public static synchronized Boolean checkCompleted(String start) throws IOException {
         File file = new File("BlockList.txt");
         if(!file.exists()){
@@ -219,12 +236,19 @@ class ClientHandler extends Thread
                     return true;
                 }
             }
-            String message = new String("Block stating with \"" + start + "\" has not yet been completed and will be assigned\n");
+            String message = new String("Block starting with \"" + start + "\" has not yet been completed and will be assigned\n");
             PrintLine(message);
             return false;
         }
     }
 
+    /**
+     * Write the name of the block and the worker thread's ID into the BlockList.txt file
+     * @param start the name of the block
+     * @param workerID worker thread ID
+     * @return  True when write operation is completed
+     * @throws IOException
+     */
     public static Boolean writeCompleted(String start, String workerID) throws IOException {
         String textToAppend = (start + "\n" + workerID);
         File file = new File("BlockList.txt");
@@ -240,12 +264,17 @@ class ClientHandler extends Thread
         writer.close();
         return true;
     }
-    public static void Print(String str){ //Implemented quicker print methods to save time
+
+    // Implemented quicker print methods to save time
+    public static void Print(String str){
       System.out.print(str);
     } 
+
     public static void PrintLine(String str){
       System.out.println(str);
     } 
+
+    // Create a search.txt file if it doesn't already exist
     private static synchronized void checkSearch() throws IOException{
         File searchFile = new File("search.txt");
         if(!searchFile.exists()){
@@ -253,6 +282,13 @@ class ClientHandler extends Thread
             searchFile.createNewFile();
         }
     }
+
+    /**
+     * Read the misses.txt file and increment the number of misses represented by count
+     * @return Total number of misses
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
     private static synchronized int incrementMisses() throws FileNotFoundException, IOException {
         BufferedReader br = new BufferedReader(new FileReader("misses.txt")); 
         int count = Integer.parseInt(br.readLine()); 
@@ -263,6 +299,8 @@ class ClientHandler extends Thread
         fw.close();
         return count;
     }
+
+    // Write the text to the search.txt file
     private static synchronized void writeToSearchFile(String text) throws IOException {
         File searchFile = new File("search.txt");
         BufferedWriter writer = new BufferedWriter(new FileWriter(searchFile, false));  
@@ -270,6 +308,7 @@ class ClientHandler extends Thread
         writer.close();
     } 
 
+    // Return true if the search.txt file is empty, false if it is not
     private static synchronized boolean isSearchEmpty(){
         File searchFile = new File("search.txt");
         if (searchFile.length()==0){
@@ -278,6 +317,7 @@ class ClientHandler extends Thread
         return false;
     }
 
+    // Returns true if the scanner in the search.txt file has another token
     private static synchronized boolean searchHasNext()throws FileNotFoundException {
         File searchFile = new File("search.txt");
          Scanner scn = new Scanner(searchFile); //For checking file
@@ -285,6 +325,8 @@ class ClientHandler extends Thread
          scn.close();
          return temp;
     }
+
+    // Return the string read from search.txt
     private static synchronized String searchString() throws FileNotFoundException {
         File searchFile = new File("search.txt");
         Scanner scn2 = new Scanner(searchFile); //For checking file
@@ -292,11 +334,13 @@ class ClientHandler extends Thread
             scn2.close();
             return term;
     }
+
     private static synchronized void clearSearchFile() throws FileNotFoundException {
         PrintWriter pw = new PrintWriter("search.txt");
         pw.close();
     }
  
+    // Return the number of connections by reading connections.txt file
     private static synchronized int getNumConnections()throws FileNotFoundException, IOException {
         BufferedReader reader = new BufferedReader(new FileReader("connections.txt"));
         int lines = 0;
@@ -304,6 +348,7 @@ class ClientHandler extends Thread
         reader.close();
         return lines;
     }
+
     // Constructor 
     public ClientHandler(Socket s, DataInputStream dis, DataOutputStream dos) { 
         this.s = s; 
@@ -394,6 +439,7 @@ class ClientHandler extends Thread
 
     }
 
+
     private void SearchCmd(String term) throws Exception{
         while (!isSearchEmpty())  
         { 
@@ -424,6 +470,7 @@ class ClientHandler extends Thread
         }
     }
 
+
     private static synchronized void createFile(String filename, String content) {
 		try {
             File file = new File(filename);
@@ -436,6 +483,7 @@ class ClientHandler extends Thread
 		
 	}
 
+    // Return the string representation of the integer code
     static String codeToString(int code){
         switch(code){
             case 110:
