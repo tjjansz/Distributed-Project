@@ -14,8 +14,8 @@ public class NTLMPassword {
 
     /**
      * 
-     * @param value 
-     * @return byte[] 
+     * @param value Password in plain text
+     * @return Hashed password
      */
     public static byte[] encodeBytes(String value){
         String s = (value != null) ? value : "";
@@ -26,8 +26,8 @@ public class NTLMPassword {
 
     /**
      * 
-     * @param value
-     * @return byte[]
+     * @param value Password in plain text
+     * @return Uppercase hashed password
      */
     public static String encode(String value) {
         String s = (value != null) ? value : "";
@@ -38,8 +38,8 @@ public class NTLMPassword {
 
     /**
      * 
-     * @param bytes
-     * @return String
+     * @param bytes Byte array to be converted into hex characters
+     * @return String Hex characters as string
      */
     private static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
