@@ -1,3 +1,6 @@
+/**
+ * This class handles all search related operations
+ */
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -5,10 +8,12 @@ import java.io.ObjectInputStream;
 import java.math.BigInteger;
 
 public class Search {
+
 	/**
+	 * This method finds which file the hash is stored in
 	 * 
-	 * @param val
-	 * @return
+	 * @param val hash value
+	 * @return a call to the binarySearch method which will return a specific file
 	 */
 	private static int findIndexFile(byte[] val) {
 		try {
@@ -22,10 +27,11 @@ public class Search {
 		return -1;
 	}
 	/**
+	 * This method finds the hash:password entry from indexed file
 	 * 
-	 * @param index
-	 * @param val
-	 * @return
+	 * @param index specifies the file to be seached
+	 * @param val the hash value to be searched
+	 * @return the password:hash entry
 	 */
 	private static byte[] getEntryinFile(int index, byte[] val) {
 		try {
@@ -53,27 +59,36 @@ public class Search {
 		return new byte[0];
 	}
 
+	/**
+	 * This method slices the given byte array with specified start and end values
+	 * 
+	 * @param arr array that will be sliced
+	 * @param start where the slice will begin
+	 * @param end where the slice will end
+	 * @return sliced byte array
+	 */
 	private static byte[] getSliceOfArray(byte[] arr, int start, int end) {
-
-// Get the slice of the Array 
+		// Get the slice of the Array 
 		byte[] slice = new byte[end - start];
 
-// Copy elements of arr to slice 
+		// Copy elements of arr to slice 
 		for (int i = 0; i < slice.length; i++) {
 			slice[i] = arr[start + i];
 		}
 
-// return the slice 
+		// return the slice 
 		return slice;
 	}
 
 	/**
+	 * Binary search, takes in array and target value. Returns index of
+	 * closest lowest value.
 	 * 
-	 * @param arr
-	 * @param l
-	 * @param r
-	 * @param x
-	 * @return
+	 * @param arr array to be searched
+	 * @param l left side of the array
+	 * @param r right side of the array
+	 * @param x target value
+	 * @return index of closest valueS
 	 */
 	private static int binarySearch(BigInteger arr[], int l, int r, BigInteger x) {
 		if (r >= l) {
@@ -111,6 +126,12 @@ public class Search {
 		}
 	}
 
+	/**
+	 * This method searches the hash value passed in as byte[] val
+	 * 
+	 * @param val the hash that will be searched
+	 * @return a call the readString method which returns the string extracted from the byte array
+	 */
 	public static String searchAll(byte[] val) {
 	 
 	 byte [] entry = getEntryinFile(findIndexFile(val), val);
@@ -121,6 +142,15 @@ public class Search {
 		
 	}
 
+	/**
+	 * This method transforms a character array into a byte array by
+	 * padding it with extra bits. The desired length of the byte array
+	 * is specified by the integer num
+	 * 
+	 * @param array character array that will be padded
+	 * @param num the fixed length of the character array we need
+	 * @return padded byte array
+	 */
 	private static byte[] writePadChars(char array[], int num) {
 		char[] output = new char[num];
 		int numZero = num - array.length;
@@ -141,6 +171,13 @@ public class Search {
 
 	}
 
+	/**
+	 * This method transforms the contents of a byte array
+	 * into a string.
+	 * 
+	 * @param array byte array that will be transformed
+	 * @return the string that is extracted from the byte array
+	 */
 	private static String readString(byte[] array) {
 		char[] temp = new char[array.length];
 		int count = 0;
