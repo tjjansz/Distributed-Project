@@ -27,4 +27,7 @@ java Server <br> <br>
 Run Client: <br>
 java Main <br><br>
 
-Application developed and tested on Ubuntu 18.04
+Application developed and tested on Ubuntu 18.04 <br>
+
+Dependencies:
+https://www.jcifs.org/
