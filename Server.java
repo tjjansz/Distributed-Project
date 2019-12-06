@@ -1,23 +1,21 @@
-// Java implementation of  Server side 
-// It contains two classes : Server and ClientHandler 
-// Save file as Server.java 
-  
+/**
+ * Java implementation of the Server side 
+ */
 import java.io.*; 
 import java.text.*; 
 import java.util.*; 
 import java.net.*; 
-  
-// Server class 
+
 public class Server  
 {     
-    //for generating queue list
+    // For generating queue list
     private static ArrayList <String> queueList = new ArrayList <String>();
 	private static int counter = 0;
 	private static boolean flag = false;
 	private static String charset = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
-
-    private static void queueListBuilder(){
+	// Create text file where the queue list items will be written
+	private static void queueListBuilder(){
         
 		File tmpDir = new File("QL.txt");
 		boolean exists = tmpDir.exists();
@@ -39,8 +37,13 @@ public class Server
 				e.printStackTrace();
 			}
 		}
-        
-    }
+	}
+	
+	/**
+	 * This method returns the index found in charset
+	 * @param c character to be searched
+	 * @return the index where the char is located
+	 */
     private static int findIndexinCharset(char c) {
 		for (int i = 0; i < charset.length(); i++) {
 			if (c == charset.charAt(i)) {
@@ -49,6 +52,14 @@ public class Server
 		}
 		return -1;
 	}
+
+	/**
+	 * Generates clear text from starting string to a specified incremented number. For input ("a", 3)
+	 * Would generate [b,c,d]. It is not inclusive of the starting value
+	 * 
+	 * @param start The starting string
+	 * @param numIncrement Defines the upper limit for the clear text that are generated
+	 */
 	private static void generateFunc(String start, int numIncrement) {
 		ArrayList<Integer> indexes = new ArrayList<Integer>();
 		
@@ -121,7 +132,15 @@ public class Server
 			
 		}
 	}
-		private static void createFile(String filename, String content) {
+
+	/**
+	 * This method creates a file with a specific file name and writes contents
+	 * passed into the method as string
+	 * 
+	 * @param filename the file to be created
+	 * @param content the content that will be written in the file
+	 */
+	private static void createFile(String filename, String content) {
 		try {
             File file = new File(filename);
             FileWriter fw = new FileWriter(file,false);
@@ -130,11 +149,11 @@ public class Server
         } catch (IOException e) {
             e.printStackTrace();
         }
-		
 	}
+
     public static void main(String[] args) throws IOException  
     { 
-        // server is listening on port 5056 
+        // Server is listening on port 5056 
         ServerSocket ss = new ServerSocket(5056); 
 
         queueListBuilder();
@@ -142,40 +161,32 @@ public class Server
 
         createFile("misses.txt","0");
         File searchFile = new File ("search.txt");
-        // try{
-        //     FileWriter fw = new FileWriter("search.txt",false);
-        //     fw.write(target);
-        //     fw.close();
-        // }catch(Exception e){
-        // e.printStackTrace();
-        // }
+
         if(!searchFile.exists()){
             System.out.println("Not Exists, creating new search file");
             searchFile.createNewFile();
         }
 
-
-        System.out.println("Waiting for Connections...");
-        // running infinite loop for getting 
-        // client request 
+		System.out.println("Waiting for Connections...");
+		
+        // Running infinite loop for getting client request 
         while (true)  
         { 
             Socket s = null; 
-              
             try 
             { 
-                // socket object to receive incoming client requests 
+                // Socket object to receive incoming client requests 
                 s = ss.accept(); 
                   
                 System.out.println("A new client is connected : " + s); 
                   
-                // obtaining input and out streams 
+                // Obtaining input and out streams 
                 DataInputStream dis = new DataInputStream(s.getInputStream()); 
                 DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
                   
                 System.out.println("Assigning new thread for this client"); 
   
-                // create a new thread object 
+                // Create a new thread object 
                 Thread t = new ClientHandler(s, dis, dos); 
   
                 // Invoking the start() method 
