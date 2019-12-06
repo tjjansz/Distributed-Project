@@ -1,3 +1,7 @@
+/*
+This class is the thread that is created by the Server when a new Client is accepted
+Performs control flow with client and communicates with other threads via files and synchronized methods
+*/
 import java.io.*; 
 import java.text.*; 
 import java.util.*; 
@@ -439,7 +443,7 @@ class ClientHandler extends Thread
 
     }
 
-
+    //waits for client to respond
     private void SearchCmd(String term) throws Exception{
         while (!isSearchEmpty())  
         { 
@@ -470,7 +474,7 @@ class ClientHandler extends Thread
         }
     }
 
-
+    //creates file (synchronized) method
     private static synchronized void createFile(String filename, String content) {
 		try {
             File file = new File(filename);

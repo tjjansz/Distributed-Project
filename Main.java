@@ -1,3 +1,6 @@
+/*
+Client-side(node) that connects to Server
+*/
 import java.math.BigInteger;
 import java.io.BufferedReader;
 import java.io.FileReader;
